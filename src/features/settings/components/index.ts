@@ -1,0 +1,4 @@
+export { ProfileSettings } from './profile-settings'
+export { AccountSettings } from './account-settings'
+export { PlatformSettings } from './platform-settings'
+export { ComingSoonSection } from './coming-soon-section'

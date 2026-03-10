@@ -1,0 +1,85 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 30 100% 97%;
+    --foreground: 240 10% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 10%;
+    --primary: 18 100% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 18 100% 70%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 30 20% 93%;
+    --muted-foreground: 240 5% 45%;
+    --accent: 345 100% 70%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 30 20% 90%;
+    --input: 30 20% 90%;
+    --ring: 18 100% 60%;
+    --radius: 1rem;
+
+    --ink-orange: #FF6B35;
+    --ink-coral: #FF8C61;
+    --ink-peach: #FFB088;
+    --ink-pink: #FF6B8A;
+    --ink-cream: #FFF5EE;
+  }
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+  body {
+    @apply bg-ink-cream antialiased;
+    color: hsl(var(--foreground));
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer components {
+  .glass {
+    @apply bg-white/20 backdrop-blur-xl border border-white/20 rounded-3xl shadow-glass;
+  }
+  .glass-card {
+    @apply bg-white/30 backdrop-blur-xl border border-white/25 rounded-3xl shadow-glass transition-all duration-300 hover:shadow-glass-lg hover:bg-white/40;
+  }
+  .glass-subtle {
+    @apply bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl;
+  }
+  .glass-nav {
+    @apply bg-white/20 backdrop-blur-2xl border-t border-white/20;
+  }
+  .glass-sidebar {
+    @apply bg-white/15 backdrop-blur-2xl border-r border-white/15;
+  }
+  .gradient-warm {
+    background: linear-gradient(135deg, #FFF5EE 0%, #FFE4D6 30%, #FFD4BC 60%, #FFC4A8 100%);
+  }
+  .gradient-accent {
+    background: linear-gradient(135deg, #FF6B35 0%, #FF8C61 50%, #FF6B8A 100%);
+  }
+  .gradient-blob-1 {
+    background: radial-gradient(circle, rgba(255, 107, 53, 0.3) 0%, transparent 70%);
+  }
+  .gradient-blob-2 {
+    background: radial-gradient(circle, rgba(255, 107, 138, 0.25) 0%, transparent 70%);
+  }
+  .gradient-blob-3 {
+    background: radial-gradient(circle, rgba(255, 140, 97, 0.2) 0%, transparent 70%);
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, #FF6B35, #FF6B8A);
+  }
+}

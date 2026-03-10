@@ -1,13 +1,27 @@
 'use client'
 
-import { Calendar, AlertCircle, Tag } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { Calendar, AlertCircle, Tag, ChevronDown } from 'lucide-react'
 import { format, parseISO, isPast, isToday } from 'date-fns'
 import { cn } from '@/shared/lib/utils'
-import type { Task, TaskPriority, TaskCategory } from '../types/task'
+import type { Task, TaskPriority, TaskCategory, TaskStatus } from '../types/task'
 import {
   TASK_PRIORITY_LABELS,
   TASK_CATEGORY_LABELS,
+  TASK_STATUS_LABELS,
 } from '../types/task'
+
+// ---------------------------------------------------------------------------
+// Statuses that can be targeted when moving a task
+// ---------------------------------------------------------------------------
+
+const ALL_STATUSES: TaskStatus[] = ['todo', 'in_progress', 'done']
+
+const MOVE_OPTION_STYLES: Record<TaskStatus, string> = {
+  todo: 'text-ink-orange',
+  in_progress: 'text-ink-coral',
+  done: 'text-emerald-600',
+}
 
 // ---------------------------------------------------------------------------
 // Priority badge styles
@@ -87,9 +101,11 @@ interface TaskCardProps {
   task: Task
   onDragStart: (e: React.DragEvent<HTMLElement>, taskId: string) => void
   onClick?: (task: Task) => void
+  /** Called when user picks a status from the mobile "Mover a" menu. */
+  onMoveToStatus?: (taskId: string, newStatus: TaskStatus) => void
 }
 
-export function TaskCard({ task, onDragStart, onClick }: TaskCardProps) {
+export function TaskCard({ task, onDragStart, onClick, onMoveToStatus }: TaskCardProps) {
   const hasDueDate = Boolean(task.due_date)
   const dueDate = hasDueDate ? parseISO(task.due_date!) : null
 
@@ -102,6 +118,54 @@ export function TaskCard({ task, onDragStart, onClick }: TaskCardProps) {
       ? 'Hoy'
       : format(dueDate, 'dd MMM')
     : null
+
+  // Mobile "Mover a" dropdown state
+  const [moveOpen, setMoveOpen] = useState(false)
+  const moveMenuRef = useRef<HTMLDivElement>(null)
+  const moveButtonRef = useRef<HTMLButtonElement>(null)
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    if (!moveOpen) return
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (
+        moveMenuRef.current &&
+        !moveMenuRef.current.contains(e.target as Node) &&
+        moveButtonRef.current &&
+        !moveButtonRef.current.contains(e.target as Node)
+      ) {
+        setMoveOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleOutsideClick)
+    return () => document.removeEventListener('mousedown', handleOutsideClick)
+  }, [moveOpen])
+
+  // Close on Escape
+  useEffect(() => {
+    if (!moveOpen) return
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setMoveOpen(false)
+        moveButtonRef.current?.focus()
+      }
+    }
+    document.addEventListener('keyup', handleKeyUp)
+    return () => document.removeEventListener('keyup', handleKeyUp)
+  }, [moveOpen])
+
+  const targetStatuses = ALL_STATUSES.filter((s) => s !== task.status)
+
+  const handleMoveToggle = (e: React.MouseEvent | React.KeyboardEvent) => {
+    e.stopPropagation()
+    setMoveOpen((prev) => !prev)
+  }
+
+  const handleMoveSelect = (e: React.MouseEvent, newStatus: TaskStatus) => {
+    e.stopPropagation()
+    setMoveOpen(false)
+    onMoveToStatus?.(task.id, newStatus)
+  }
 
   const handleClick = () => onClick?.(task)
 
@@ -180,7 +244,7 @@ export function TaskCard({ task, onDragStart, onClick }: TaskCardProps) {
           </p>
         )}
 
-        {/* Footer: due date + assignee */}
+        {/* Footer: due date + assignee + mobile move button */}
         <div className="flex items-center justify-between gap-2 mt-2">
           {/* Due date */}
           {dueDate ? (
@@ -206,13 +270,84 @@ export function TaskCard({ task, onDragStart, onClick }: TaskCardProps) {
             <span />
           )}
 
-          {/* Assignee */}
-          {task.assignee && (
-            <AssigneeAvatar
-              fullName={task.assignee.full_name}
-              avatarUrl={task.assignee.avatar_url}
-            />
-          )}
+          {/* Right-side cluster: assignee + mobile move button */}
+          <div className="flex items-center gap-2">
+            {/* Assignee */}
+            {task.assignee && (
+              <AssigneeAvatar
+                fullName={task.assignee.full_name}
+                avatarUrl={task.assignee.avatar_url}
+              />
+            )}
+
+            {/* Mobile "Mover a" dropdown — hidden on md+ where drag-and-drop works */}
+            {onMoveToStatus && (
+              <div className="relative md:hidden">
+                <button
+                  ref={moveButtonRef}
+                  type="button"
+                  onClick={handleMoveToggle}
+                  aria-haspopup="menu"
+                  aria-expanded={moveOpen}
+                  aria-label="Mover tarea a otra columna"
+                  className={cn(
+                    'flex items-center gap-0.5 px-1.5 py-0.5 rounded-lg',
+                    'text-[10px] font-semibold text-ink-dark/60',
+                    'bg-white/40 border border-white/40',
+                    'hover:bg-white/60 hover:text-ink-dark',
+                    'active:scale-95 transition-all duration-150',
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink-orange/50'
+                  )}
+                >
+                  Mover
+                  <ChevronDown
+                    className={cn(
+                      'h-3 w-3 transition-transform duration-150',
+                      moveOpen && 'rotate-180'
+                    )}
+                    aria-hidden="true"
+                  />
+                </button>
+
+                {moveOpen && (
+                  <div
+                    ref={moveMenuRef}
+                    role="menu"
+                    aria-label="Mover tarea a"
+                    className={cn(
+                      'absolute bottom-full right-0 mb-1 z-50',
+                      'min-w-[130px] rounded-xl overflow-hidden',
+                      'bg-white/90 backdrop-blur-xl border border-white/60',
+                      'shadow-glass-lg',
+                      'animate-in fade-in slide-in-from-bottom-1 duration-150'
+                    )}
+                  >
+                    <p className="px-3 pt-2 pb-1 text-[9px] font-bold uppercase tracking-widest text-ink-dark/40">
+                      Mover a
+                    </p>
+                    {targetStatuses.map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        role="menuitem"
+                        onClick={(e) => handleMoveSelect(e, s)}
+                        className={cn(
+                          'w-full text-left px-3 py-2 text-xs font-semibold',
+                          'flex items-center gap-2',
+                          'hover:bg-black/5 active:bg-black/10',
+                          'transition-colors duration-100',
+                          'focus-visible:outline-none focus-visible:bg-black/5',
+                          MOVE_OPTION_STYLES[s]
+                        )}
+                      >
+                        {TASK_STATUS_LABELS[s]}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </article>

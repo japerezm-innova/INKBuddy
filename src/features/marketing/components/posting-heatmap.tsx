@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { GlassCard } from '@/shared/components'
 import { cn } from '@/shared/lib/utils'
-import { getHeatmapData } from '../services/recommendations-service'
+import { getHeatmapData, getBestPostingTimes } from '../services/recommendations-service'
 import { DAY_NAMES_ES } from '../constants/tattoo-marketing'
 import type { SocialPlatform } from '../types/marketing'
 
@@ -53,6 +53,9 @@ const DAY_ORDER = [1, 2, 3, 4, 5, 6, 0] as const
 
 export function PostingHeatmap({ platform, className }: Props) {
   const [matrix, setMatrix] = useState<number[][]>([])
+  const [bestTimes, setBestTimes] = useState<
+    { day: string; time: string; score: number }[]
+  >([])
   const [tooltip, setTooltip] = useState<TooltipState>({
     visible: false,
     text: '',
@@ -62,6 +65,7 @@ export function PostingHeatmap({ platform, className }: Props) {
 
   useEffect(() => {
     setMatrix(getHeatmapData(platform))
+    setBestTimes(getBestPostingTimes(platform))
   }, [platform])
 
   function handleCellMouseEnter(
@@ -96,7 +100,40 @@ export function PostingHeatmap({ platform, className }: Props) {
         </h2>
         <p className="text-xs text-ink-dark/50 mb-4">{platformLabel}</p>
 
-        <div className="overflow-x-auto">
+        {/* Mobile simplified list — top 5 best times */}
+        <ol className="md:hidden space-y-2 mb-2" aria-label="Top 5 mejores horarios">
+          {bestTimes.map(({ day, time, score }, index) => (
+            <li
+              key={`${day}-${time}`}
+              className="flex items-center justify-between rounded-lg bg-white/5 px-3 py-2"
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-semibold text-ink-dark/40 w-4 text-center">
+                  {index + 1}
+                </span>
+                <span className="text-sm font-medium text-ink-dark">
+                  {day}
+                </span>
+                <span className="text-sm text-ink-dark/60">{time}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-ink-dark/50">
+                  {SCORE_LABELS[score] ?? 'Sin datos'}
+                </span>
+                <div
+                  className={cn(
+                    'w-3 h-3 rounded-full flex-shrink-0',
+                    SCORE_STYLES[score] ?? SCORE_STYLES[0]
+                  )}
+                  aria-label={`Nivel: ${SCORE_LABELS[score] ?? 'Sin datos'}`}
+                />
+              </div>
+            </li>
+          ))}
+        </ol>
+
+        {/* Desktop full heatmap grid */}
+        <div className="hidden md:block overflow-x-auto">
           <div className="min-w-[360px]">
             {/* Hour headers */}
             <div className="flex items-center mb-1 pl-10">

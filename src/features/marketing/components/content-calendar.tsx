@@ -22,7 +22,8 @@ import { POST_STATUS_LABELS } from '../constants/tattoo-marketing'
 import type { CalendarPost } from '../types/marketing'
 
 // Ordered Mon-Sun (Monday first, index 0)
-const WEEK_DAYS = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom']
+const WEEK_DAYS_FULL = ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom']
+const WEEK_DAYS_SHORT = ['L', 'M', 'X', 'J', 'V', 'S', 'D']
 
 // Convert JS getDay() (0=Sun...6=Sat) to Monday-first offset (0=Mon...6=Sun)
 function mondayFirstOffset(date: Date): number {
@@ -33,18 +34,19 @@ function mondayFirstOffset(date: Date): number {
 function CalendarSkeleton() {
   return (
     <GlassCard>
-      <div className="grid grid-cols-7 gap-1 mb-2">
-        {WEEK_DAYS.map((d) => (
+      <div className="grid grid-cols-7 gap-0.5 sm:gap-1 mb-2">
+        {WEEK_DAYS_FULL.map((d, i) => (
           <div key={d} className="text-center text-xs font-medium text-ink-dark/50 py-2">
-            {d}
+            <span className="hidden sm:inline">{d}</span>
+            <span className="sm:hidden">{WEEK_DAYS_SHORT[i]}</span>
           </div>
         ))}
       </div>
-      <div className="grid grid-cols-7 gap-1">
+      <div className="grid grid-cols-7 gap-0.5 sm:gap-1">
         {Array.from({ length: 35 }).map((_, i) => (
           <div
             key={i}
-            className="h-14 rounded-xl bg-white/10 animate-pulse"
+            className="h-12 sm:h-14 rounded-xl bg-white/10 animate-pulse"
           />
         ))}
       </div>
@@ -85,15 +87,15 @@ export function ContentCalendar() {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <CalendarIcon className="h-5 w-5 text-ink-orange" aria-hidden="true" />
-          <h2 className="text-xl font-semibold text-ink-dark capitalize">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <CalendarIcon className="h-4 w-4 sm:h-5 sm:w-5 text-ink-orange flex-shrink-0" aria-hidden="true" />
+          <h2 className="text-base sm:text-lg font-semibold text-ink-dark capitalize truncate">
             {format(currentDate, 'MMMM yyyy', { locale: es })}
           </h2>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
           <GlassButton
             variant="ghost"
             size="sm"
@@ -129,22 +131,23 @@ export function ContentCalendar() {
       ) : (
         <GlassCard>
           {/* Day headers */}
-          <div className="grid grid-cols-7 gap-1 mb-2">
-            {WEEK_DAYS.map((d) => (
+          <div className="grid grid-cols-7 gap-0.5 sm:gap-1 mb-2">
+            {WEEK_DAYS_FULL.map((d, i) => (
               <div
                 key={d}
                 className="text-center text-xs font-medium text-ink-dark/50 py-2"
               >
-                {d}
+                <span className="hidden sm:inline">{d}</span>
+                <span className="sm:hidden">{WEEK_DAYS_SHORT[i]}</span>
               </div>
             ))}
           </div>
 
           {/* Day cells */}
-          <div className="grid grid-cols-7 gap-1">
+          <div className="grid grid-cols-7 gap-0.5 sm:gap-1">
             {/* Empty cells for offset */}
             {Array.from({ length: startOffset }).map((_, i) => (
-              <div key={`empty-${i}`} className="h-14" />
+              <div key={`empty-${i}`} className="h-12 sm:h-14" />
             ))}
 
             {monthDays.map((day) => {
@@ -160,7 +163,7 @@ export function ContentCalendar() {
                   aria-label={`${format(day, 'd MMMM yyyy', { locale: es })}${dayPosts.length > 0 ? `, ${dayPosts.length} publicacion${dayPosts.length > 1 ? 'es' : ''}` : ''}`}
                   aria-pressed={isSelected}
                   className={cn(
-                    'h-14 rounded-xl p-1.5 flex flex-col items-start transition-all duration-200 cursor-pointer text-left',
+                    'h-12 sm:h-14 rounded-xl p-1 sm:p-1.5 flex flex-col items-start transition-all duration-200 cursor-pointer text-left',
                     'hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink-orange/50',
                     isToday && 'border border-ink-orange/50',
                     isSelected && 'bg-white/20',
@@ -213,8 +216,8 @@ export function ContentCalendar() {
 
       {/* Selected day detail */}
       <GlassCard>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-ink-dark">
+        <div className="flex items-start sm:items-center justify-between gap-2 mb-4">
+          <h3 className="font-semibold text-ink-dark text-sm sm:text-base capitalize min-w-0 truncate">
             {selectedDay
               ? format(selectedDay, "EEEE d 'de' MMMM", { locale: es })
               : 'Detalle del dia'}
@@ -224,10 +227,12 @@ export function ContentCalendar() {
             <Link
               href={`/marketing/posts/new?date=${format(selectedDay, 'yyyy-MM-dd')}`}
               aria-label="Agregar nueva publicacion"
+              className="flex-shrink-0"
             >
               <GlassButton size="sm">
                 <Plus className="h-3.5 w-3.5" aria-hidden="true" />
-                Agregar Post
+                <span className="hidden xs:inline">Agregar Post</span>
+                <span className="xs:hidden">Nuevo</span>
               </GlassButton>
             </Link>
           )}
@@ -252,7 +257,7 @@ export function ContentCalendar() {
               return (
                 <li key={post.id}>
                   <Link href={`/marketing/posts/${post.id}`}>
-                    <div className="flex items-start gap-3 p-3 rounded-2xl hover:bg-white/15 transition-colors duration-200 cursor-pointer">
+                    <div className="flex items-start gap-2 sm:gap-3 p-2 sm:p-3 rounded-2xl hover:bg-white/15 transition-colors duration-200 cursor-pointer">
                       <span
                         className={cn('mt-1 h-2.5 w-2.5 rounded-full flex-shrink-0', statusInfo?.color ?? 'bg-gray-400')}
                         aria-hidden="true"
@@ -263,7 +268,7 @@ export function ContentCalendar() {
                             ? post.caption.slice(0, 40) + (post.caption.length > 40 ? '...' : '')
                             : 'Sin descripcion'}
                         </p>
-                        <div className="flex items-center gap-2 mt-1">
+                        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-1">
                           <span className="text-xs px-2 py-0.5 rounded-full bg-white/20 text-ink-dark/60">
                             {post.post_type}
                           </span>
@@ -274,7 +279,7 @@ export function ContentCalendar() {
                           )}
                         </div>
                       </div>
-                      <span className="text-xs text-ink-dark/50 flex-shrink-0">
+                      <span className="text-xs text-ink-dark/50 flex-shrink-0 hidden sm:inline">
                         {statusInfo?.label}
                       </span>
                     </div>

@@ -86,6 +86,11 @@ export function TaskColumn({
 
   const handleAddClick = () => onAddTask?.(status)
 
+  // Mobile move handler — delegates to the same onDrop used by drag-and-drop
+  const handleMoveToStatus = (taskId: string, newStatus: TaskStatus) => {
+    onDrop(taskId, newStatus)
+  }
+
   return (
     <section
       aria-label={`Columna ${TASK_STATUS_LABELS[status]}`}
@@ -172,6 +177,7 @@ export function TaskColumn({
                 task={task}
                 onDragStart={handleDragStart}
                 onClick={onTaskClick}
+                onMoveToStatus={handleMoveToStatus}
               />
             ))}
 

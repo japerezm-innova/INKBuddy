@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Poppins } from 'next/font/google'
 import './globals.css'
 
@@ -8,9 +8,27 @@ const poppins = Poppins({
   variable: '--font-poppins',
 })
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
+  themeColor: '#FF6B35',
+}
+
 export const metadata: Metadata = {
   title: 'INKBuddy | Gestion de Estudio de Tatuaje',
   description: 'Sistema integral de gestion para estudios de tatuaje',
+  manifest: '/manifest.webmanifest',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'INKBuddy',
+  },
+  formatDetection: {
+    telephone: false,
+  },
 }
 
 export default function RootLayout({

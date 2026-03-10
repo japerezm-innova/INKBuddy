@@ -5,14 +5,7 @@ export const emailProvider: NotificationProvider = {
 
   async send(notification: Notification) {
     // TODO: Implement with Supabase Edge Function or Resend
-    console.log(
-      '[EMAIL] Would send:',
-      notification.template,
-      'to:',
-      notification.recipient_id,
-      '| payload:',
-      notification.payload
-    )
+    void notification
     return { success: true }
   },
 }

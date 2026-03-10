@@ -255,6 +255,7 @@ export function PostPlanner({ existingPost }: Props) {
                 <img
                   src={imageUrl}
                   alt="Vista previa de la imagen"
+                  loading="lazy"
                   className="rounded-2xl max-h-64 w-full object-cover"
                 />
                 <button
@@ -462,6 +463,7 @@ export function PostPlanner({ existingPost }: Props) {
                   <img
                     src={imageUrl}
                     alt="Preview de imagen del post"
+                    loading="lazy"
                     className="w-full h-36 object-cover rounded-2xl"
                   />
                 ) : (

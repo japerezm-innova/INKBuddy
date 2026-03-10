@@ -78,6 +78,9 @@ function AssigneeAvatar({ fullName, avatarUrl }: AssigneeAvatarProps) {
       <img
         src={avatarUrl}
         alt={fullName ?? 'Asignado'}
+        width={24}
+        height={24}
+        loading="lazy"
         className="h-6 w-6 rounded-full object-cover ring-1 ring-white/40"
       />
     )

@@ -5,12 +5,7 @@ export const whatsappProvider: NotificationProvider = {
 
   async send(notification: Notification) {
     // TODO: Implement WhatsApp Business API integration
-    console.log(
-      '[WHATSAPP] Integration not configured. Would send:',
-      notification.template,
-      '| recipient:',
-      notification.recipient_id
-    )
+    void notification
     return { success: false, error: 'WhatsApp integration not yet configured' }
   },
 }

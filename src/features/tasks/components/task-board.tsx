@@ -116,7 +116,7 @@ export function TaskBoard() {
       if (result.error) {
         // Rollback
         updateTaskLocally(taskId, { status: task.status })
-        console.error('Error al mover tarea:', result.error)
+        // Silently rolled back — user sees original state
       } else if (result.data) {
         // Sync with server data
         updateTaskLocally(taskId, result.data)
@@ -187,7 +187,7 @@ export function TaskBoard() {
       const result = await deleteTask(taskId)
       if (result.error) {
         // Re-load to restore state on error
-        console.error('Error al eliminar tarea:', result.error)
+        // Reload to restore state on error
         loadTasks()
       }
     },

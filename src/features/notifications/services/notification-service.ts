@@ -88,7 +88,7 @@ export function getProviderForChannel(channel: NotificationChannel): Notificatio
     return {
       channel,
       async send(notification: Notification) {
-        console.log(`[${channel.toUpperCase()}] Provider not implemented. Template:`, notification.template)
+        // Provider not implemented — silently return error
         return { success: false, error: `Provider for channel '${channel}' not implemented` }
       },
     }

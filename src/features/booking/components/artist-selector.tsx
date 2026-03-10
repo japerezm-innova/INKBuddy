@@ -95,9 +95,13 @@ export function ArtistSelector({ selectedArtistId, onSelect }: ArtistSelectorPro
               {/* Avatar or initials */}
               <div className="flex-shrink-0">
                 {artist.avatar_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={artist.avatar_url}
                     alt={artist.full_name ?? 'Artista'}
+                    width={56}
+                    height={56}
+                    loading="lazy"
                     className="h-14 w-14 rounded-2xl object-cover"
                   />
                 ) : (

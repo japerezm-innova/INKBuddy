@@ -211,9 +211,11 @@ export function PortfolioUpload({
       {form.image_url && !imageError && (
         <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-white/20 border border-white/25">
           {/* eslint-disable-next-line @next/next/no-img-element */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={form.image_url}
             alt="Vista previa"
+            loading="lazy"
             className="w-full h-full object-cover"
             onError={() => setImageError('No se pudo cargar la imagen. Verifica la URL.')}
           />

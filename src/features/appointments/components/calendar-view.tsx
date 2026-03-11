@@ -12,6 +12,7 @@ import { useAppointmentStore } from '@/features/appointments/store/appointment-s
 import type { Appointment } from '@/features/appointments/types/appointment'
 import { CalendarDaySelector } from './calendar-day-selector'
 import { AppointmentCard } from './appointment-card'
+import { AppointmentDetailModal } from './appointment-detail-modal'
 
 // Hours displayed in the day view timeline
 const TIMELINE_HOURS = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
@@ -304,6 +305,9 @@ export function CalendarView() {
       >
         <Plus className="h-6 w-6 text-white" aria-hidden="true" />
       </Link>
+
+      {/* Appointment detail modal */}
+      <AppointmentDetailModal appointments={appointments} />
     </div>
   )
 }

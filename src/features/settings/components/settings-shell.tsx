@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { Settings } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
 import {
   ProfileSettings,
   AccountSettings,
@@ -14,12 +13,13 @@ import type { Profile } from '@/features/auth/types/auth'
 import type { StudioSettings } from '../types/settings'
 import { DEFAULT_STUDIO_SETTINGS } from '../types/settings'
 
-interface SettingsData {
-  profile: Profile
-  studioSettings: StudioSettings
-  calendarToken: string | null
-  isOwner: boolean
-  baseUrl: string
+interface MeResponse {
+  profile: Profile & {
+    studio?: {
+      settings?: Partial<StudioSettings>
+      calendar_token?: string
+    }
+  }
 }
 
 function SettingsSkeleton() {
@@ -60,67 +60,46 @@ function LoginPrompt() {
 }
 
 export function SettingsShell() {
-  const [data, setData] = useState<SettingsData | null>(null)
+  const [profile, setProfile] = useState<Profile | null>(null)
+  const [studioSettings, setStudioSettings] = useState<StudioSettings>(DEFAULT_STUDIO_SETTINGS)
+  const [calendarToken, setCalendarToken] = useState<string | null>(null)
   const [status, setStatus] = useState<'loading' | 'ready' | 'unauthenticated'>('loading')
 
   useEffect(() => {
-    const supabase = createClient()
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (event === 'SIGNED_OUT' || !session) {
+    fetch('/api/me')
+      .then((res) => {
+        if (res.status === 401) {
           setStatus('unauthenticated')
-          return
+          return null
         }
+        return res.json()
+      })
+      .then((data: MeResponse | null) => {
+        if (data?.profile) {
+          setProfile(data.profile)
 
-        if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-          const { data: profile, error: profileError } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', session.user.id)
-            .single()
-
-          if (profileError || !profile) {
-            setStatus('unauthenticated')
-            return
-          }
-
-          const { data: studio } = await supabase
-            .from('studios')
-            .select('settings, calendar_token')
-            .eq('id', profile.studio_id)
-            .single()
-
-          const rawSettings = (studio?.settings ?? {}) as Partial<StudioSettings>
-          const studioSettings: StudioSettings = {
+          const raw = data.profile.studio?.settings ?? {}
+          setStudioSettings({
             ...DEFAULT_STUDIO_SETTINGS,
-            ...rawSettings,
+            ...raw,
             platforms: {
               ...DEFAULT_STUDIO_SETTINGS.platforms,
-              ...(rawSettings.platforms ?? {}),
+              ...(raw.platforms ?? {}),
             },
-          }
-
-          setData({
-            profile: profile as Profile,
-            studioSettings,
-            calendarToken: studio?.calendar_token ?? null,
-            isOwner: profile.role === 'owner',
-            baseUrl: window.location.origin,
           })
+          setCalendarToken(data.profile.studio?.calendar_token ?? null)
           setStatus('ready')
         }
-      }
-    )
-
-    return () => subscription.unsubscribe()
+      })
+      .catch(() => setStatus('unauthenticated'))
   }, [])
 
   if (status === 'loading') return <SettingsSkeleton />
   if (status === 'unauthenticated') return <LoginPrompt />
-  if (!data) return null
+  if (!profile) return null
 
-  const { profile, studioSettings, calendarToken, isOwner, baseUrl } = data
+  const isOwner = profile.role === 'owner'
+  const baseUrl = window.location.origin
 
   return (
     <div className="p-4 md:p-6 lg:p-8 max-w-4xl mx-auto">

@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { OwnerDashboard } from './owner-dashboard'
 import { ArtistDashboard } from './artist-dashboard'
 import type { Profile } from '@/features/auth/types/auth'
@@ -51,41 +50,25 @@ export function DashboardShell() {
   const [status, setStatus] = useState<'loading' | 'ready' | 'unauthenticated'>('loading')
 
   useEffect(() => {
-    const supabase = createClient()
-
-    // onAuthStateChange fires with INITIAL_SESSION after the client syncs
-    // cookies → localStorage. Much more reliable than getSession() on mobile.
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (event === 'SIGNED_OUT' || !session) {
+    fetch('/api/me')
+      .then((res) => {
+        if (res.status === 401) {
           setStatus('unauthenticated')
-          return
+          return null
         }
-
-        if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-          const { data, error } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', session.user.id)
-            .single()
-
-          if (error || !data) {
-            setStatus('unauthenticated')
-            return
-          }
-
-          setProfile(data as Profile)
+        return res.json()
+      })
+      .then((data) => {
+        if (data?.profile) {
+          setProfile(data.profile as Profile)
           setStatus('ready')
         }
-      }
-    )
-
-    return () => subscription.unsubscribe()
+      })
+      .catch(() => setStatus('unauthenticated'))
   }, [])
 
   if (status === 'loading') return <DashboardSkeleton />
   if (status === 'unauthenticated') return <LoginPrompt />
-
   if (!profile) return null
 
   return profile.role === 'owner' ? (

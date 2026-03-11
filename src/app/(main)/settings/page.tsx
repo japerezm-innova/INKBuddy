@@ -1,11 +1,12 @@
 import { redirect } from 'next/navigation'
 import { getProfile } from '@/features/auth/services/auth-service'
-import { getStudioSettings } from '@/features/settings/services/settings-service'
+import { getStudioSettings, getCalendarToken } from '@/features/settings/services/settings-service'
 import {
   ProfileSettings,
   AccountSettings,
   PlatformSettings,
   ComingSoonSection,
+  CalendarSettings,
 } from '@/features/settings/components'
 import { Settings } from 'lucide-react'
 import { DEFAULT_STUDIO_SETTINGS } from '@/features/settings/types/settings'
@@ -22,7 +23,10 @@ export default async function SettingsPage() {
     redirect('/login')
   }
 
-  const { data: settings } = await getStudioSettings()
+  const [{ data: settings }, { data: calendarToken }] = await Promise.all([
+    getStudioSettings(),
+    getCalendarToken(),
+  ])
   const studioSettings = settings ?? DEFAULT_STUDIO_SETTINGS
   const isOwner = profile.role === 'owner'
 
@@ -51,6 +55,7 @@ export default async function SettingsPage() {
         {isOwner && (
           <PlatformSettings initialSettings={studioSettings} isOwner={isOwner} />
         )}
+        {calendarToken && <CalendarSettings initialToken={calendarToken} />}
         <ComingSoonSection />
       </main>
     </div>

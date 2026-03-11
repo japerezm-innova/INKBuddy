@@ -85,6 +85,58 @@ export async function getStudioSettings(): Promise<{
   return { data: mergedSettings }
 }
 
+export async function getCalendarToken(): Promise<{
+  data?: string
+  error?: string
+}> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser()
+  if (userError || !user) return { error: 'No autenticado' }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('studio_id')
+    .eq('id', user.id)
+    .single()
+
+  if (!profile) return { error: 'Perfil no encontrado' }
+
+  const { data, error } = await supabase
+    .from('studios')
+    .select('calendar_token')
+    .eq('id', profile.studio_id)
+    .single()
+
+  if (error) return { error: error.message }
+  return { data: data?.calendar_token as string }
+}
+
+export async function regenerateCalendarToken(): Promise<{
+  data?: string
+  error?: string
+}> {
+  const { studioId, error: authError } = await getAuthenticatedStudioId()
+  if (authError || !studioId) return { error: authError ?? 'No autorizado' }
+
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('studios')
+    .update({
+      calendar_token: crypto.randomUUID(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', studioId)
+    .select('calendar_token')
+    .single()
+
+  if (error) return { error: error.message }
+  revalidatePath('/settings')
+  return { data: data?.calendar_token as string }
+}
+
 export async function updateStudioSettings(
   settings: StudioSettings
 ): Promise<{ data?: StudioSettings; error?: string }> {

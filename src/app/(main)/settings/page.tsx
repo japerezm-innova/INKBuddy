@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import { headers } from 'next/headers'
 import { getProfile } from '@/features/auth/services/auth-service'
 import { getStudioSettings, getCalendarToken } from '@/features/settings/services/settings-service'
 import {
@@ -30,6 +31,11 @@ export default async function SettingsPage() {
   const studioSettings = settings ?? DEFAULT_STUDIO_SETTINGS
   const isOwner = profile.role === 'owner'
 
+  const headersList = await headers()
+  const host = headersList.get('host') ?? 'inkbuddycl.vercel.app'
+  const proto = host.startsWith('localhost') ? 'http' : 'https'
+  const baseUrl = `${proto}://${host}`
+
   return (
     <div className="p-4 md:p-6 lg:p-8 max-w-4xl mx-auto">
       <header className="mb-6 flex items-center gap-3">
@@ -55,7 +61,9 @@ export default async function SettingsPage() {
         {isOwner && (
           <PlatformSettings initialSettings={studioSettings} isOwner={isOwner} />
         )}
-        {calendarToken && <CalendarSettings initialToken={calendarToken} />}
+        {calendarToken && (
+          <CalendarSettings baseUrl={baseUrl} initialToken={calendarToken} />
+        )}
         <ComingSoonSection />
       </main>
     </div>

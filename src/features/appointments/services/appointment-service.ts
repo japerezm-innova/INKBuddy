@@ -40,6 +40,9 @@ const createAppointmentSchema = z.object({
   client_email: z.string().email().optional(),
   body_placement: z.string().max(200).optional(),
   design_reference_urls: z.array(z.string().url()).optional(),
+  consent_accepted: z.boolean().optional(),
+  consent_accepted_at: z.string().optional(),
+  consent_name: z.string().max(200).optional(),
 })
 
 const updateAppointmentSchema = z.object({

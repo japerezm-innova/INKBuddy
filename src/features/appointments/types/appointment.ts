@@ -24,6 +24,9 @@ export interface Appointment {
   design_reference_urls: string[] | null
   body_placement: string | null
   external_calendar_id: string | null
+  consent_accepted: boolean
+  consent_accepted_at: string | null
+  consent_name: string | null
   created_at: string
   updated_at: string
   // Joined relations
@@ -74,6 +77,9 @@ export interface CreateAppointmentInput {
   client_email?: string
   body_placement?: string
   design_reference_urls?: string[]
+  consent_accepted?: boolean
+  consent_accepted_at?: string
+  consent_name?: string
 }
 
 export interface UpdateAppointmentInput {

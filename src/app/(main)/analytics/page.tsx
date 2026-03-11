@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { getProfile } from '@/features/auth/services/auth-service'
 import { AnalyticsDashboard } from '@/features/analytics/components'
+import { ProGate } from '@/shared/components'
 import { BarChart3 } from 'lucide-react'
 
 export const metadata = {
@@ -36,7 +37,9 @@ export default async function AnalyticsPage() {
       </header>
 
       <main>
-        <AnalyticsDashboard />
+        <ProGate>
+          <AnalyticsDashboard />
+        </ProGate>
       </main>
     </div>
   )

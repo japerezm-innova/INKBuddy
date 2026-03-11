@@ -18,12 +18,14 @@ import {
   XCircle,
   PlayCircle,
   Edit,
+  ExternalLink,
 } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/shared/lib/utils'
 import { useAppointmentStore } from '../store/appointment-store'
 import { updateAppointment } from '../services/appointment-service'
 import { AppointmentStatusBadge } from './appointment-status-badge'
+import { buildGoogleCalendarUrl } from '@/shared/lib/calendar-url'
 import type { Appointment, AppointmentStatus } from '../types/appointment'
 
 // ---------------------------------------------------------------------------
@@ -288,6 +290,17 @@ function ModalContent({ appointment, onClose, onUpdate }: ModalContentProps) {
           </div>
         </div>
       )}
+
+      {/* Google Calendar */}
+      <a
+        href={buildGoogleCalendarUrl(appointment)}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center gap-2 text-sm font-medium text-ink-orange hover:text-ink-orange/80 transition-colors"
+      >
+        <ExternalLink className="h-4 w-4" />
+        Agregar a Google Calendar
+      </a>
 
       {/* Reschedule section */}
       <div className="border-t border-white/30 pt-4">

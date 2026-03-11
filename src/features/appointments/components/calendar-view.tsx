@@ -296,7 +296,7 @@ export function CalendarView() {
         href="/appointments/new"
         aria-label="Crear nueva cita"
         className={cn(
-          'fixed bottom-24 right-5 md:bottom-8 md:right-8 z-40',
+          'fixed bottom-24 right-5 md:bottom-8 md:right-8 z-50',
           'h-14 w-14 flex items-center justify-center',
           'gradient-accent rounded-full shadow-warm-lg',
           'hover:scale-105 hover:shadow-warm transition-all duration-200',

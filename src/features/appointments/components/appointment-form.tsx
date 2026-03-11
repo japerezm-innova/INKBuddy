@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { format, parseISO, addMinutes } from 'date-fns'
 import {
   User,
@@ -11,6 +12,7 @@ import {
   DollarSign,
   Clock,
   Calendar,
+  CheckCircle,
 } from 'lucide-react'
 import { GlassButton, GlassInput } from '@/shared/components'
 import { cn, glass } from '@/shared/lib/utils'
@@ -20,6 +22,8 @@ import {
   getServices,
   getArtists,
 } from '@/features/appointments/services/appointment-service'
+import { buildGoogleCalendarUrl } from '@/shared/lib/calendar-url'
+import { ConsentCheckbox } from './consent-checkbox'
 import type { Profile } from '@/features/auth/types/auth'
 import type {
   Appointment,
@@ -47,6 +51,7 @@ interface FormState {
   body_placement: string
   notes: string
   design_reference_urls: string
+  consent_accepted: boolean
 }
 
 interface FormErrors {
@@ -55,6 +60,25 @@ interface FormErrors {
   date?: string
   start_time?: string
   end_time?: string
+  consent?: string
+}
+
+function recalcEndTime(startTime: string, date: string, durationMinutes: number): string {
+  if (!startTime || !date) return ''
+  const [h, m] = startTime.split(':').map(Number)
+  const startDate = new Date(date)
+  startDate.setHours(h ?? 0, m ?? 0, 0, 0)
+  return format(addMinutes(startDate, durationMinutes), 'HH:mm')
+}
+
+function buildInitialDuration(appointment?: Appointment): number {
+  if (appointment) {
+    const starts = new Date(appointment.starts_at)
+    const ends = new Date(appointment.ends_at)
+    const diff = Math.round((ends.getTime() - starts.getTime()) / 60000)
+    return diff > 0 ? diff : 60
+  }
+  return 60
 }
 
 function buildInitialState(appointment?: Appointment): FormState {
@@ -75,6 +99,7 @@ function buildInitialState(appointment?: Appointment): FormState {
       body_placement: appointment.body_placement ?? '',
       notes: appointment.notes ?? '',
       design_reference_urls: appointment.design_reference_urls?.join(', ') ?? '',
+      consent_accepted: false,
     }
   }
 
@@ -93,25 +118,19 @@ function buildInitialState(appointment?: Appointment): FormState {
     body_placement: '',
     notes: '',
     design_reference_urls: '',
+    consent_accepted: false,
   }
 }
 
-function validate(state: FormState): FormErrors {
+function validate(state: FormState, isEditMode: boolean): FormErrors {
   const errors: FormErrors = {}
-  if (!state.client_name.trim()) {
-    errors.client_name = 'El nombre del cliente es requerido'
-  }
-  if (!state.artist_id) {
-    errors.artist_id = 'Debes seleccionar un artista'
-  }
-  if (!state.date) {
-    errors.date = 'La fecha es requerida'
-  }
-  if (!state.start_time) {
-    errors.start_time = 'La hora de inicio es requerida'
-  }
-  if (!state.end_time) {
-    errors.end_time = 'La hora de fin es requerida'
+  if (!state.client_name.trim()) errors.client_name = 'El nombre del cliente es requerido'
+  if (!state.artist_id) errors.artist_id = 'Debes seleccionar un artista'
+  if (!state.date) errors.date = 'La fecha es requerida'
+  if (!state.start_time) errors.start_time = 'La hora de inicio es requerida'
+  if (!state.end_time) errors.end_time = 'La hora de fin es requerida'
+  if (!isEditMode && !state.consent_accepted) {
+    errors.consent = 'El cliente debe aceptar el consentimiento para continuar'
   }
   return errors
 }
@@ -126,14 +145,7 @@ interface GlassSelectProps {
   children: React.ReactNode
 }
 
-function GlassSelect({
-  id,
-  label,
-  value,
-  onChange,
-  error,
-  children,
-}: GlassSelectProps) {
+function GlassSelect({ id, label, value, onChange, error, children }: GlassSelectProps) {
   return (
     <div className="flex flex-col gap-1.5 w-full">
       <label htmlFor={id} className="text-sm font-medium text-ink-dark/80">
@@ -172,14 +184,7 @@ interface GlassTextareaProps {
   rows?: number
 }
 
-function GlassTextarea({
-  id,
-  label,
-  value,
-  onChange,
-  placeholder,
-  rows = 3,
-}: GlassTextareaProps) {
+function GlassTextarea({ id, label, value, onChange, placeholder, rows = 3 }: GlassTextareaProps) {
   return (
     <div className="flex flex-col gap-1.5 w-full">
       <label htmlFor={id} className="text-sm font-medium text-ink-dark/80">
@@ -191,22 +196,115 @@ function GlassTextarea({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         rows={rows}
-        className={cn(
-          glass.input,
-          'w-full px-4 py-3 text-sm text-ink-dark outline-none resize-none'
-        )}
+        className={cn(glass.input, 'w-full px-4 py-3 text-sm text-ink-dark outline-none resize-none')}
       />
     </div>
   )
 }
 
+// Duration selector (hours + minutes)
+interface DurationSelectProps {
+  durationMinutes: number
+  onChange: (minutes: number) => void
+}
+
+function DurationSelect({ durationMinutes, onChange }: DurationSelectProps) {
+  const hours = Math.floor(durationMinutes / 60)
+  const mins = durationMinutes % 60
+
+  function handleHours(h: number) {
+    onChange(h * 60 + mins)
+  }
+  function handleMins(m: number) {
+    const newTotal = hours * 60 + m
+    onChange(newTotal > 0 ? newTotal : 15)
+  }
+
+  return (
+    <div className="flex flex-col gap-1.5 w-full">
+      <span className="text-sm font-medium text-ink-dark/80">Duracion</span>
+      <div className="grid grid-cols-2 gap-2">
+        <select
+          value={hours}
+          onChange={(e) => handleHours(Number(e.target.value))}
+          className={cn(
+            glass.input,
+            'w-full h-11 px-4 text-sm text-ink-dark outline-none appearance-none cursor-pointer'
+          )}
+        >
+          {Array.from({ length: 13 }, (_, i) => (
+            <option key={i} value={i}>
+              {i}h
+            </option>
+          ))}
+        </select>
+        <select
+          value={mins}
+          onChange={(e) => handleMins(Number(e.target.value))}
+          className={cn(
+            glass.input,
+            'w-full h-11 px-4 text-sm text-ink-dark outline-none appearance-none cursor-pointer'
+          )}
+        >
+          {[0, 15, 30, 45].map((m) => (
+            <option key={m} value={m}>
+              {m}min
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
+  )
+}
+
+// Success screen shown after creating an appointment
+interface SuccessScreenProps {
+  appointment: Appointment
+  onViewAgenda: () => void
+}
+
+function SuccessScreen({ appointment, onViewAgenda }: SuccessScreenProps) {
+  const gcalUrl = buildGoogleCalendarUrl(appointment)
+
+  return (
+    <div className="flex flex-col items-center gap-5 py-8 text-center">
+      <div className="h-16 w-16 rounded-full bg-emerald-100 flex items-center justify-center">
+        <CheckCircle className="h-8 w-8 text-emerald-500" />
+      </div>
+      <div>
+        <h3 className="text-lg font-bold text-ink-dark">Cita creada!</h3>
+        <p className="text-sm text-ink-dark/60 mt-1">La cita ha sido registrada correctamente.</p>
+      </div>
+      <div className="flex flex-col gap-2 w-full max-w-xs">
+        <a
+          href={gcalUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-2 h-11 px-5 rounded-2xl bg-white/15 hover:bg-white/25 backdrop-blur-md border border-white/20 text-ink-dark text-sm font-medium transition-all duration-200"
+        >
+          <Calendar className="h-4 w-4 text-ink-orange" />
+          Agregar a Google Calendar
+        </a>
+        <GlassButton variant="primary" size="md" className="w-full" onClick={onViewAgenda}>
+          Ver agenda
+        </GlassButton>
+      </div>
+    </div>
+  )
+}
+
 export function AppointmentForm({ appointment, onSuccess }: AppointmentFormProps) {
+  const router = useRouter()
   const isEditMode = Boolean(appointment)
 
   const [form, setForm] = useState<FormState>(() => buildInitialState(appointment))
+  const [durationMinutes, setDurationMinutes] = useState<number>(() =>
+    buildInitialDuration(appointment)
+  )
   const [errors, setErrors] = useState<FormErrors>({})
   const [serverError, setServerError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [successAppointment, setSuccessAppointment] = useState<Appointment | null>(null)
 
   const [artists, setArtists] = useState<Profile[]>([])
   const [services, setServices] = useState<Service[]>([])
@@ -222,20 +320,51 @@ export function AppointmentForm({ appointment, onSuccess }: AppointmentFormProps
     [errors]
   )
 
-  // Auto-calculate end time when service changes
+  // Auto-navigate after showing success
+  useEffect(() => {
+    if (!successAppointment) return
+    const timer = setTimeout(() => router.push('/appointments'), 3000)
+    return () => clearTimeout(timer)
+  }, [successAppointment, router])
+
+  // Handle duration change → recalc end_time
+  const handleDurationChange = useCallback(
+    (newDuration: number) => {
+      setDurationMinutes(newDuration)
+      if (form.start_time && form.date) {
+        const newEnd = recalcEndTime(form.start_time, form.date, newDuration)
+        setForm((prev) => ({ ...prev, end_time: newEnd }))
+      }
+    },
+    [form.start_time, form.date]
+  )
+
+  // Handle start_time change → keep duration, recalc end_time
+  const handleStartTimeChange = useCallback(
+    (newStart: string) => {
+      const newEnd = form.date
+        ? recalcEndTime(newStart, form.date, durationMinutes)
+        : form.end_time
+      setForm((prev) => ({ ...prev, start_time: newStart, end_time: newEnd }))
+      setErrors((prev) => ({ ...prev, start_time: undefined, end_time: undefined }))
+    },
+    [form.date, form.end_time, durationMinutes]
+  )
+
+  // Handle service change → update duration, recalc end_time
   const handleServiceChange = useCallback(
     (serviceId: string) => {
-      setField('service_id', serviceId)
-      if (serviceId && form.start_time) {
+      if (serviceId) {
         const svc = services.find((s) => s.id === serviceId)
-        if (svc && form.date) {
-          const [h, m] = form.start_time.split(':').map(Number)
-          const startDate = new Date(form.date)
-          startDate.setHours(h ?? 0, m ?? 0, 0, 0)
-          const endDate = addMinutes(startDate, svc.duration_minutes)
-          setField('end_time', format(endDate, 'HH:mm'))
+        if (svc && form.date && form.start_time) {
+          const newDuration = svc.duration_minutes
+          setDurationMinutes(newDuration)
+          const newEnd = recalcEndTime(form.start_time, form.date, newDuration)
+          setForm((prev) => ({ ...prev, service_id: serviceId, end_time: newEnd }))
+          return
         }
       }
+      setField('service_id', serviceId)
     },
     [services, form.start_time, form.date, setField]
   )
@@ -243,16 +372,9 @@ export function AppointmentForm({ appointment, onSuccess }: AppointmentFormProps
   useEffect(() => {
     async function loadMeta() {
       setIsLoadingMeta(true)
-      const [artistsResult, servicesResult] = await Promise.all([
-        getArtists(),
-        getServices(),
-      ])
-      if (artistsResult.data) {
-        setArtists(artistsResult.data)
-      }
-      if (servicesResult.data) {
-        setServices(servicesResult.data)
-      }
+      const [artistsResult, servicesResult] = await Promise.all([getArtists(), getServices()])
+      if (artistsResult.data) setArtists(artistsResult.data)
+      if (servicesResult.data) setServices(servicesResult.data)
       setIsLoadingMeta(false)
     }
     loadMeta()
@@ -262,7 +384,7 @@ export function AppointmentForm({ appointment, onSuccess }: AppointmentFormProps
     e.preventDefault()
     setServerError(null)
 
-    const validationErrors = validate(form)
+    const validationErrors = validate(form, isEditMode)
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors)
       return
@@ -271,7 +393,6 @@ export function AppointmentForm({ appointment, onSuccess }: AppointmentFormProps
     setIsSubmitting(true)
 
     try {
-      // Build local datetime and convert to ISO with offset
       const startLocal = new Date(`${form.date}T${form.start_time}:00`)
       const endLocal = new Date(`${form.date}T${form.end_time}:00`)
       const starts_at = startLocal.toISOString()
@@ -313,17 +434,32 @@ export function AppointmentForm({ appointment, onSuccess }: AppointmentFormProps
           price: form.price ? Number(form.price) : undefined,
           deposit: form.deposit ? Number(form.deposit) : undefined,
           design_reference_urls: designUrls.length > 0 ? designUrls : undefined,
+          consent_accepted: form.consent_accepted,
+          consent_accepted_at: form.consent_accepted ? new Date().toISOString() : undefined,
         }
         const { data, error } = await createAppointment(input)
         if (error) {
           setServerError(error)
         } else if (data) {
-          onSuccess?.(data)
+          if (onSuccess) {
+            onSuccess(data)
+          } else {
+            setSuccessAppointment(data)
+          }
         }
       }
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  if (successAppointment) {
+    return (
+      <SuccessScreen
+        appointment={successAppointment}
+        onViewAgenda={() => router.push('/appointments')}
+      />
+    )
   }
 
   return (
@@ -375,7 +511,6 @@ export function AppointmentForm({ appointment, onSuccess }: AppointmentFormProps
             Sesion
           </legend>
           <div className="flex flex-col gap-3">
-            {/* Artist selector */}
             <GlassSelect
               id="artist_id"
               label="Artista"
@@ -393,7 +528,6 @@ export function AppointmentForm({ appointment, onSuccess }: AppointmentFormProps
               ))}
             </GlassSelect>
 
-            {/* Service selector */}
             <GlassSelect
               id="service_id"
               label="Servicio"
@@ -410,7 +544,6 @@ export function AppointmentForm({ appointment, onSuccess }: AppointmentFormProps
               ))}
             </GlassSelect>
 
-            {/* Date */}
             <GlassInput
               label="Fecha"
               id="date"
@@ -423,31 +556,31 @@ export function AppointmentForm({ appointment, onSuccess }: AppointmentFormProps
               aria-required="true"
             />
 
-            {/* Time range */}
-            <div className="grid grid-cols-2 gap-3">
-              <GlassInput
-                label="Hora inicio"
-                id="start_time"
-                icon={Clock}
-                type="time"
-                value={form.start_time}
-                onChange={(e) => setField('start_time', e.target.value)}
-                error={errors.start_time}
-                required
-                aria-required="true"
-              />
-              <GlassInput
-                label="Hora fin"
-                id="end_time"
-                icon={Clock}
-                type="time"
-                value={form.end_time}
-                onChange={(e) => setField('end_time', e.target.value)}
-                error={errors.end_time}
-                required
-                aria-required="true"
-              />
-            </div>
+            <GlassInput
+              label="Hora inicio"
+              id="start_time"
+              icon={Clock}
+              type="time"
+              value={form.start_time}
+              onChange={(e) => handleStartTimeChange(e.target.value)}
+              error={errors.start_time}
+              required
+              aria-required="true"
+            />
+
+            <DurationSelect durationMinutes={durationMinutes} onChange={handleDurationChange} />
+
+            <GlassInput
+              label="Hora fin (auto-calculada)"
+              id="end_time"
+              icon={Clock}
+              type="time"
+              value={form.end_time}
+              onChange={(e) => setField('end_time', e.target.value)}
+              error={errors.end_time}
+              required
+              aria-required="true"
+            />
           </div>
         </fieldset>
 
@@ -515,6 +648,18 @@ export function AppointmentForm({ appointment, onSuccess }: AppointmentFormProps
             />
           </div>
         </fieldset>
+
+        {/* --- Consent (new appointments only) --- */}
+        {!isEditMode && (
+          <ConsentCheckbox
+            value={form.consent_accepted}
+            onChange={(v) => {
+              setForm((prev) => ({ ...prev, consent_accepted: v }))
+              if (errors.consent) setErrors((prev) => ({ ...prev, consent: undefined }))
+            }}
+            error={errors.consent}
+          />
+        )}
 
         {/* Server error */}
         {serverError && (

@@ -23,7 +23,7 @@ export async function GET() {
     // Fetch studio data for settings (settings, calendar_token)
     const { data: studio } = await supabase
       .from('studios')
-      .select('settings, calendar_token')
+      .select('settings, calendar_token, plan')
       .eq('id', profile.studio_id)
       .single()
 

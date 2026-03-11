@@ -8,6 +8,7 @@ import {
   PlatformSettings,
   ComingSoonSection,
   CalendarSettings,
+  ActivationSettings,
 } from '@/features/settings/components'
 import type { Profile } from '@/features/auth/types/auth'
 import type { StudioSettings } from '../types/settings'
@@ -18,6 +19,7 @@ interface MeResponse {
     studio?: {
       settings?: Partial<StudioSettings>
       calendar_token?: string
+      plan?: string
     }
   }
 }
@@ -63,6 +65,7 @@ export function SettingsShell() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [studioSettings, setStudioSettings] = useState<StudioSettings>(DEFAULT_STUDIO_SETTINGS)
   const [calendarToken, setCalendarToken] = useState<string | null>(null)
+  const [studioPlan, setStudioPlan] = useState<string>('free')
   const [status, setStatus] = useState<'loading' | 'ready' | 'unauthenticated'>('loading')
 
   useEffect(() => {
@@ -88,6 +91,7 @@ export function SettingsShell() {
             },
           })
           setCalendarToken(data.profile.studio?.calendar_token ?? null)
+          setStudioPlan(data.profile.studio?.plan ?? 'free')
           setStatus('ready')
         }
       })
@@ -111,12 +115,8 @@ export function SettingsShell() {
           <Settings className="h-5 w-5 text-white" />
         </div>
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-ink-dark">
-            Configuracion
-          </h1>
-          <p className="text-sm text-ink-dark/50 mt-0.5">
-            Administra tu perfil y preferencias
-          </p>
+          <h1 className="text-2xl md:text-3xl font-bold text-ink-dark">Configuracion</h1>
+          <p className="text-sm text-ink-dark/50 mt-0.5">Administra tu perfil y preferencias</p>
         </div>
       </header>
 
@@ -124,11 +124,12 @@ export function SettingsShell() {
         <ProfileSettings profile={profile} />
         <AccountSettings profile={profile} />
         {isOwner && (
-          <PlatformSettings initialSettings={studioSettings} isOwner={isOwner} />
+          <>
+            <PlatformSettings initialSettings={studioSettings} isOwner={isOwner} />
+            <ActivationSettings currentPlan={studioPlan} />
+          </>
         )}
-        {calendarToken && (
-          <CalendarSettings baseUrl={baseUrl} initialToken={calendarToken} />
-        )}
+        {calendarToken && <CalendarSettings baseUrl={baseUrl} initialToken={calendarToken} />}
         <ComingSoonSection />
       </main>
     </div>

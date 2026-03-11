@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { getProfile } from '@/features/auth/services/auth-service'
 import { MarketingDashboard, RecommendationsPanel } from '@/features/marketing/components'
+import { ProGate } from '@/shared/components'
 import { Megaphone } from 'lucide-react'
 
 export const metadata = {
@@ -35,8 +36,10 @@ export default async function MarketingPage() {
       </header>
 
       <main className="space-y-6">
-        <MarketingDashboard />
-        <RecommendationsPanel platform="instagram" />
+        <ProGate>
+          <MarketingDashboard />
+          <RecommendationsPanel platform="instagram" />
+        </ProGate>
       </main>
     </div>
   )

@@ -54,15 +54,9 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     return redirectResponse
   }
 
-  if (user && authPaths.some((p) => pathname.startsWith(p))) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/dashboard'
-    const redirectResponse = NextResponse.redirect(url)
-    supabaseResponse.cookies.getAll().forEach((cookie) => {
-      redirectResponse.cookies.set(cookie)
-    })
-    return redirectResponse
-  }
+  // Note: we intentionally do NOT redirect authenticated users away from /login.
+  // Allowing /login access breaks the redirect loop when session cookies are in
+  // a stale/refreshed state and lets users always re-authenticate.
 
   return supabaseResponse
 }

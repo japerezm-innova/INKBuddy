@@ -7,8 +7,8 @@ export default function AuthLayout({
     <div className="relative min-h-screen overflow-hidden gradient-warm">
       {/* Animated blobs */}
       <div className="gradient-blob-1 animate-blob absolute -top-20 -left-20 w-72 h-72 rounded-full" />
-      <div className="gradient-blob-2 animate-blob absolute top-1/2 -right-24 w-96 h-96 rounded-full [animation-delay:2s]" />
-      <div className="gradient-blob-3 animate-blob absolute -bottom-20 left-1/3 w-80 h-80 rounded-full [animation-delay:4s]" />
+      <div className="gradient-blob-2 animate-blob absolute top-1/2 -right-24 w-96 h-96 rounded-full" style={{ animationDelay: '2s' }} />
+      <div className="gradient-blob-3 animate-blob absolute -bottom-20 left-1/3 w-80 h-80 rounded-full" style={{ animationDelay: '4s' }} />
 
       {/* Brand mark */}
       <div className="absolute top-6 left-8 z-10">

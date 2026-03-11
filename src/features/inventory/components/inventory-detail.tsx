@@ -14,7 +14,7 @@ import {
   Trash2,
   SlidersHorizontal,
 } from 'lucide-react'
-import { GlassCard, GlassButton, GlassInput, StatCard } from '@/shared/components'
+import { GlassCard, GlassButton, GlassInput, StatCard } from '@/shared/components/client'
 import { cn } from '@/shared/lib/utils'
 import {
   getInventoryItemById,

@@ -189,7 +189,7 @@ function ModalContent({ appointment, onClose, onUpdate }: ModalContentProps) {
       {/* Info grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {/* Time */}
-        <div className="flex items-center gap-2.5 bg-white/20 rounded-2xl p-3">
+        <div className="flex items-center gap-2.5 bg-white/50 rounded-2xl p-3">
           <Clock className="h-4 w-4 text-ink-orange shrink-0" />
           <div>
             <p className="text-xs text-ink-dark/50">Horario</p>
@@ -203,7 +203,7 @@ function ModalContent({ appointment, onClose, onUpdate }: ModalContentProps) {
         </div>
 
         {/* Artist */}
-        <div className="flex items-center gap-2.5 bg-white/20 rounded-2xl p-3">
+        <div className="flex items-center gap-2.5 bg-white/50 rounded-2xl p-3">
           <User className="h-4 w-4 text-ink-orange shrink-0" />
           <div>
             <p className="text-xs text-ink-dark/50">Artista</p>
@@ -213,7 +213,7 @@ function ModalContent({ appointment, onClose, onUpdate }: ModalContentProps) {
 
         {/* Body placement */}
         {appointment.body_placement && (
-          <div className="flex items-center gap-2.5 bg-white/20 rounded-2xl p-3">
+          <div className="flex items-center gap-2.5 bg-white/50 rounded-2xl p-3">
             <MapPin className="h-4 w-4 text-ink-orange shrink-0" />
             <div>
               <p className="text-xs text-ink-dark/50">Zona</p>
@@ -224,7 +224,7 @@ function ModalContent({ appointment, onClose, onUpdate }: ModalContentProps) {
 
         {/* Service */}
         {serviceDisplay && (
-          <div className="flex items-center gap-2.5 bg-white/20 rounded-2xl p-3">
+          <div className="flex items-center gap-2.5 bg-white/50 rounded-2xl p-3">
             <Palette className="h-4 w-4 text-ink-orange shrink-0" />
             <div>
               <p className="text-xs text-ink-dark/50">Servicio</p>
@@ -235,7 +235,7 @@ function ModalContent({ appointment, onClose, onUpdate }: ModalContentProps) {
 
         {/* Price */}
         {appointment.price != null && (
-          <div className="flex items-center gap-2.5 bg-white/20 rounded-2xl p-3">
+          <div className="flex items-center gap-2.5 bg-white/50 rounded-2xl p-3">
             <DollarSign className="h-4 w-4 text-ink-orange shrink-0" />
             <div>
               <p className="text-xs text-ink-dark/50">Precio</p>
@@ -253,7 +253,7 @@ function ModalContent({ appointment, onClose, onUpdate }: ModalContentProps) {
 
         {/* Phone */}
         {(appointment.client_phone ?? appointment.client?.phone) && (
-          <div className="flex items-center gap-2.5 bg-white/20 rounded-2xl p-3">
+          <div className="flex items-center gap-2.5 bg-white/50 rounded-2xl p-3">
             <Phone className="h-4 w-4 text-ink-orange shrink-0" />
             <div>
               <p className="text-xs text-ink-dark/50">Telefono</p>
@@ -266,7 +266,7 @@ function ModalContent({ appointment, onClose, onUpdate }: ModalContentProps) {
 
         {/* Email */}
         {appointment.client_email && (
-          <div className="flex items-center gap-2.5 bg-white/20 rounded-2xl p-3">
+          <div className="flex items-center gap-2.5 bg-white/50 rounded-2xl p-3">
             <Mail className="h-4 w-4 text-ink-orange shrink-0" />
             <div>
               <p className="text-xs text-ink-dark/50">Email</p>
@@ -280,7 +280,7 @@ function ModalContent({ appointment, onClose, onUpdate }: ModalContentProps) {
 
       {/* Notes */}
       {appointment.notes && (
-        <div className="flex gap-2.5 bg-white/20 rounded-2xl p-3">
+        <div className="flex gap-2.5 bg-white/50 rounded-2xl p-3">
           <FileText className="h-4 w-4 text-ink-orange shrink-0 mt-0.5" />
           <div>
             <p className="text-xs text-ink-dark/50 mb-1">Notas</p>
@@ -431,13 +431,13 @@ export function AppointmentDetailModal({ appointments }: Props) {
       role="dialog"
       aria-modal="true"
       aria-label="Detalle de cita"
-      style={{ backgroundColor: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(4px)' }}
+      style={{ backgroundColor: 'rgba(0,0,0,0.15)', backdropFilter: 'blur(3px)' }}
     >
       {/* Glass panel */}
       <div
         className={cn(
           'w-full sm:max-w-lg max-h-[90vh] overflow-y-auto',
-          'bg-white/40 backdrop-blur-2xl border border-white/50 shadow-glass-lg',
+          'bg-white/75 backdrop-blur-xl border border-white/60 shadow-glass-lg',
           'rounded-t-3xl sm:rounded-3xl',
           'p-5 sm:p-6',
           'animate-slide-up sm:animate-none'

@@ -33,11 +33,16 @@ export function DashboardShell() {
   const router = useRouter()
 
   useEffect(() => {
-    async function loadProfile() {
-      const supabase = createClient()
-      const { data: { user }, error: userError } = await supabase.auth.getUser()
+    const supabase = createClient()
 
-      if (userError || !user) {
+    // Fallback: if auth takes too long, redirect to login
+    const timeout = setTimeout(() => {
+      router.push('/login')
+    }, 8000)
+
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!session?.user) {
+        clearTimeout(timeout)
         router.push('/login')
         return
       }
@@ -45,8 +50,10 @@ export function DashboardShell() {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', user.id)
+        .eq('id', session.user.id)
         .single()
+
+      clearTimeout(timeout)
 
       if (error || !data) {
         router.push('/login')
@@ -55,9 +62,9 @@ export function DashboardShell() {
 
       setProfile(data as Profile)
       setLoading(false)
-    }
+    })
 
-    loadProfile()
+    return () => clearTimeout(timeout)
   }, [router])
 
   if (loading) return <DashboardSkeleton />

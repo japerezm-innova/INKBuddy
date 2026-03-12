@@ -13,6 +13,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  webpackBuildWorker: false,
 }
 
 export default nextConfig

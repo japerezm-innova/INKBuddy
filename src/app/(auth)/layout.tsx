@@ -11,10 +11,12 @@ export default function AuthLayout({
       <div className="gradient-blob-3 animate-blob absolute -bottom-20 left-1/3 w-80 h-80 rounded-full" style={{ animationDelay: '4s' }} />
 
       {/* Brand mark */}
-      <div className="absolute top-6 left-8 z-10">
-        <span className="text-gradient text-2xl font-bold tracking-tight">
-          INKBuddy
-        </span>
+      <div className="absolute top-6 left-0 right-0 z-10 flex justify-center md:justify-start md:left-8">
+        <img
+          src="/logo.png"
+          alt="InkBuddy Logo"
+          className="h-16 w-auto object-contain hover:scale-105 transition-transform duration-300"
+        />
       </div>
 
       {/* Centered content */}

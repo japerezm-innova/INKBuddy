@@ -20,9 +20,6 @@ export default function AuthLayout({
               alt="InkBuddy Logo"
               className="h-20 w-auto object-contain"
             />
-            <span className="mt-1 text-2xl font-bold text-ink-orange tracking-tight">
-              INKBuddy
-            </span>
           </div>
           {/* Form card */}
           <div className="rounded-3xl border border-white/25 bg-white/30 p-8 shadow-glass-lg backdrop-blur-xl">

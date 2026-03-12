@@ -18,6 +18,15 @@ export function AppShell({ children, className, userName, userEmail }: AppShellP
       {/* Desktop sidebar */}
       <Sidebar userName={userName ?? null} userEmail={userEmail ?? null} />
 
+      {/* Mobile top logo */}
+      <div className="fixed top-3 right-3 z-50 md:hidden">
+        <img
+          src="/logo.png"
+          alt="InkBuddy"
+          className="h-10 w-auto object-contain drop-shadow-md"
+        />
+      </div>
+
       {/* Main content */}
       <main
         className={cn(

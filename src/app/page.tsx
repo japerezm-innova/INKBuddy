@@ -3,14 +3,22 @@ import Link from 'next/link'
 export default function Home() {
   return (
     <div className="min-h-screen gradient-warm flex flex-col items-center justify-center relative overflow-hidden">
-      {/* Blobs */}
-      <div className="gradient-blob-1 animate-blob absolute -top-20 -right-20 w-96 h-96 rounded-full" />
-      <div className="gradient-blob-2 animate-blob-slow absolute bottom-0 -left-20 w-80 h-80 rounded-full" />
+      {/* Animated blobs — same as auth layout for continuity */}
+      <div className="gradient-blob-1 animate-blob absolute -top-20 -left-20 w-72 h-72 rounded-full" />
+      <div className="gradient-blob-2 animate-blob absolute top-1/2 -right-24 w-96 h-96 rounded-full" style={{ animationDelay: '2s' }} />
+      <div className="gradient-blob-3 animate-blob absolute -bottom-20 left-1/3 w-80 h-80 rounded-full" style={{ animationDelay: '4s' }} />
 
-      <div className="relative z-10 text-center px-4">
-        <h1 className="text-5xl md:text-7xl font-bold mb-4">
-          <span className="text-gradient">INKBuddy</span>
-        </h1>
+      <div className="relative z-10 text-center px-4 flex flex-col items-center">
+        <div className="mb-2 drop-shadow-xl">
+          <img
+            src="/logo.png"
+            alt="InkBuddy"
+            className="h-32 md:h-48 w-auto object-contain hover:scale-105 transition-transform duration-500"
+          />
+        </div>
+        <span className="mb-6 text-3xl font-bold text-ink-orange tracking-tight">
+          INKBuddy
+        </span>
         <p className="text-xl text-gray-600 mb-8 max-w-md mx-auto">
           Tu asistente inteligente para gestionar tu estudio de tatuaje
         </p>

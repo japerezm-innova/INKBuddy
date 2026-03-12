@@ -20,7 +20,7 @@ export default function AuthLayout({
               alt="InkBuddy Logo"
               className="h-20 w-auto object-contain"
             />
-            <span className="mt-1 text-2xl font-bold text-ink-dark tracking-tight">
+            <span className="mt-1 text-2xl font-bold text-ink-orange tracking-tight">
               INKBuddy
             </span>
           </div>

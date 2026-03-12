@@ -83,17 +83,23 @@
     background: linear-gradient(135deg, #FF6B35 0%, #FF8C61 50%, #FF6B8A 100%);
   }
   .gradient-blob-1 {
-    background: radial-gradient(circle, rgba(255, 107, 53, 0.3) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(255, 107, 53, 0.5) 0%, transparent 70%);
   }
   .gradient-blob-2 {
-    background: radial-gradient(circle, rgba(255, 107, 138, 0.25) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(255, 107, 138, 0.45) 0%, transparent 70%);
   }
   .gradient-blob-3 {
-    background: radial-gradient(circle, rgba(255, 140, 97, 0.2) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(255, 140, 97, 0.4) 0%, transparent 70%);
   }
 }
 
 @layer utilities {
+  .animate-blob {
+    animation: blob-morph 10s ease-in-out infinite;
+  }
+  .animate-blob-slow {
+    animation: blob-morph 14s ease-in-out infinite;
+  }
   .text-gradient {
     @apply bg-clip-text text-transparent;
     background-image: linear-gradient(135deg, #FF6B35, #FF6B8A);
@@ -124,6 +130,16 @@
 }
 .animate-slide-up {
   animation: slide-up 0.25s ease-out;
+}
+
+/* Lava lamp blob animation - smooth drift only */
+@keyframes blob-morph {
+  0%   { transform: translate(0, 0); }
+  20%  { transform: translate(40px, 30px); }
+  40%  { transform: translate(-20px, 50px); }
+  60%  { transform: translate(30px, -20px); }
+  80%  { transform: translate(-30px, 10px); }
+  100% { transform: translate(0, 0); }
 }
 
 /* Respect reduced motion preferences */

@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { headers } from 'next/headers'
 import { getQuoteById, getStudioName } from '@/features/quotes/services/quote-service'
+import { ProGate } from '@/shared/components'
 import { QuoteDetailClient } from './quote-detail-client'
 
 interface Props {
@@ -32,10 +33,12 @@ export default async function QuoteDetailPage({ params }: Props) {
   const studioName = await getStudioName(quote.studio_id)
 
   return (
-    <QuoteDetailClient
-      quote={quote}
-      publicUrl={publicUrl}
-      studioName={studioName}
-    />
+    <ProGate>
+      <QuoteDetailClient
+        quote={quote}
+        publicUrl={publicUrl}
+        studioName={studioName}
+      />
+    </ProGate>
   )
 }

@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import { headers } from 'next/headers'
-import { getQuoteById } from '@/features/quotes/services/quote-service'
+import { getQuoteById, getStudioName } from '@/features/quotes/services/quote-service'
 import { QuoteDetailClient } from './quote-detail-client'
 
 interface Props {
@@ -29,11 +29,13 @@ export default async function QuoteDetailPage({ params }: Props) {
   const protocol = host.startsWith('localhost') ? 'http' : 'https'
   const publicUrl = `${protocol}://${host}/q/${quote.id}`
 
+  const studioName = await getStudioName(quote.studio_id)
+
   return (
     <QuoteDetailClient
       quote={quote}
       publicUrl={publicUrl}
-      studioName="INKBuddy Studio"
+      studioName={studioName}
     />
   )
 }

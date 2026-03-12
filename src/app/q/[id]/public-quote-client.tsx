@@ -8,9 +8,10 @@ import type { Quote } from '@/features/quotes/types/quote'
 
 interface Props {
   quote: Quote
+  studioName: string
 }
 
-export function PublicQuoteClient({ quote: initial }: Props) {
+export function PublicQuoteClient({ quote: initial, studioName }: Props) {
   const [quote, setQuote] = useState(initial)
   const [isPending, startTransition] = useTransition()
   const [done, setDone] = useState(false)
@@ -45,7 +46,7 @@ export function PublicQuoteClient({ quote: initial }: Props) {
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-amber-50 p-4 md:p-8">
       <div className="max-w-xl mx-auto flex flex-col gap-4">
         {/* Preview */}
-        <QuotePreview quote={quote} />
+        <QuotePreview quote={quote} studioName={studioName} />
 
         {/* Actions */}
         <div className="flex flex-col gap-3 print:hidden">

@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { getQuotePublic } from '@/features/quotes/services/quote-service'
+import { getQuotePublic, getStudioName } from '@/features/quotes/services/quote-service'
 import { PublicQuoteClient } from './public-quote-client'
 
 interface Props {
@@ -22,5 +22,7 @@ export default async function PublicQuotePage({ params }: Props) {
 
   if (error || !quote) notFound()
 
-  return <PublicQuoteClient quote={quote} />
+  const studioName = await getStudioName(quote.studio_id)
+
+  return <PublicQuoteClient quote={quote} studioName={studioName} />
 }

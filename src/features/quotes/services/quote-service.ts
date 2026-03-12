@@ -262,6 +262,25 @@ export async function getQuotePublic(
   return { data: data as Quote }
 }
 
+export async function getStudioName(
+  studioId: string
+): Promise<string> {
+  if (!studioId) return 'INKBuddy Studio'
+
+  const supabase = createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+
+  const { data } = await supabase
+    .from('studios')
+    .select('name')
+    .eq('id', studioId)
+    .single()
+
+  return (data as { name: string } | null)?.name ?? 'INKBuddy Studio'
+}
+
 /**
  * Public action — no auth required.
  * Allows a client to accept or reject a 'sent' quote via the public link.

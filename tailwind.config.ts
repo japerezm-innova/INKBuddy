@@ -4,6 +4,7 @@ const config: Config = {
   content: [
     './src/**/*.{js,ts,jsx,tsx,mdx}',
   ],
+  safelist: [],
   theme: {
     extend: {
       colors: {
@@ -55,6 +56,9 @@ const config: Config = {
     },
   },
   plugins: [],
+  future: {
+    respectDefaultRingColorOpacity: true,
+  },
 }
 
 export default config

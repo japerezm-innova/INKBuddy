@@ -81,11 +81,10 @@ export const TATTOO_STYLES = [
   'Otro',
 ] as const
 
+// Hours before appointment for chatbot reminders
 export const REMINDER_HOUR_OPTIONS = [
-  { value: 72,  label: '72h antes' },
-  { value: 48,  label: '48h antes' },
-  { value: 24,  label: '24h antes' },
-  { value: 12,  label: '12h antes' },
-  { value: 2,   label: '2h antes'  },
-  { value: 1,   label: '1h antes'  },
+  { value: 168, label: '7 días antes' },
+  { value: 72,  label: '3 días antes' },
+  { value: 48,  label: '2 días antes' },
+  { value: 24,  label: '1 día antes'  },
 ] as const

@@ -270,13 +270,13 @@ export function QuoteForm({ quote }: Props) {
 
       {!quote && <div className="border-t border-white/20" />}
 
-      {/* Sección Recordatorios WSP */}
+      {/* Sección Aviso automático al cliente (chatbot WSP) */}
       <section className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <MessageCircle className="h-4 w-4 text-green-600" />
             <h2 className="text-sm font-semibold text-ink-dark/70">
-              Recordatorios por WhatsApp
+              Aviso automático al cliente
             </h2>
           </div>
           {/* Toggle switch */}
@@ -299,8 +299,9 @@ export function QuoteForm({ quote }: Props) {
 
         {wspEnabled && (
           <div className="rounded-xl bg-green-50/60 border border-green-200/60 p-4 flex flex-col gap-3">
-            <p className="text-xs text-green-700/70">
-              Selecciona cuándo recordar al cliente. Se guarda como referencia para tu seguimiento.
+            <p className="text-xs text-green-700/80 leading-relaxed">
+              Nuestro chatbot enviará un mensaje de WhatsApp al cliente recordándole su cita
+              y con recomendaciones previas al tatuaje. Selecciona con cuánta anticipación:
             </p>
             <div className="flex flex-wrap gap-2">
               {REMINDER_HOUR_OPTIONS.map(({ value, label }) => {
@@ -312,7 +313,7 @@ export function QuoteForm({ quote }: Props) {
                     onClick={() => toggleHour(value)}
                     className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
                       active
-                        ? 'bg-ink-orange text-white border-ink-orange'
+                        ? 'bg-green-600 text-white border-green-600'
                         : 'bg-white/60 text-ink-dark/60 border-white/40 hover:bg-white/80'
                     }`}
                   >
@@ -321,12 +322,16 @@ export function QuoteForm({ quote }: Props) {
                 )
               })}
             </div>
+            <p className="text-[11px] text-green-600/60 italic">
+              Próximamente disponible — la preferencia se guarda para cuando se active.
+            </p>
           </div>
         )}
 
         {!wspEnabled && (
-          <p className="text-xs text-ink-dark/40">
-            Activa para recibir un recordatorio de cuándo contactar al cliente.
+          <p className="text-xs text-ink-dark/40 leading-relaxed">
+            Activa para que el chatbot envíe recordatorios de cita y recomendaciones
+            previas al tatuaje directamente al cliente por WhatsApp.
           </p>
         )}
       </section>

@@ -165,7 +165,7 @@ export function QuoteDetailClient({ quote: initial, publicUrl, studioName }: Pro
       {/* Quote preview */}
       <QuotePreview quote={quote} studioName={studioName} />
 
-      {/* Reminders panel */}
+      {/* Chatbot WSP panel */}
       <div className={`rounded-2xl border p-4 flex items-start gap-3 ${
         quote.whatsapp_reminders_enabled
           ? 'bg-green-50/60 border-green-200/60'
@@ -179,16 +179,16 @@ export function QuoteDetailClient({ quote: initial, publicUrl, studioName }: Pro
             <p className={`text-sm font-semibold ${
               quote.whatsapp_reminders_enabled ? 'text-green-700' : 'text-ink-dark/50'
             }`}>
-              Recordatorios WSP
+              Aviso automático al cliente
               {quote.whatsapp_reminders_enabled && (
-                <span className="ml-2 text-xs font-normal text-green-600">activos</span>
+                <span className="ml-2 text-xs font-normal text-green-600">activado</span>
               )}
             </p>
             <button
               onClick={handleToggleReminders}
               disabled={isPending}
               className="shrink-0"
-              aria-label="Toggle recordatorios"
+              aria-label="Toggle aviso automatico"
             >
               {quote.whatsapp_reminders_enabled
                 ? <ToggleRight className="h-5 w-5 text-green-600" />
@@ -201,16 +201,21 @@ export function QuoteDetailClient({ quote: initial, publicUrl, studioName }: Pro
               {reminderLabels.map((label) => (
                 <span
                   key={label}
-                  className="px-2 py-0.5 rounded-full bg-ink-orange/10 text-ink-orange text-xs font-medium"
+                  className="px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-xs font-medium"
                 >
                   {label}
                 </span>
               ))}
             </div>
           )}
+          {quote.whatsapp_reminders_enabled && (
+            <p className="text-[11px] text-green-600/60 mt-1.5 italic">
+              El chatbot avisará al cliente con anticipación recordándole su cita y cuidados previos.
+            </p>
+          )}
           {!quote.whatsapp_reminders_enabled && (
             <p className="text-xs text-ink-dark/40 mt-0.5">
-              Activa para recordar cuándo contactar al cliente
+              El chatbot enviará recordatorios y recomendaciones al cliente por WhatsApp
             </p>
           )}
         </div>

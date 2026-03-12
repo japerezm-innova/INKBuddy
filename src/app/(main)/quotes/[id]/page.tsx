@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation'
+import { headers } from 'next/headers'
 import { getQuoteById } from '@/features/quotes/services/quote-service'
 import { QuoteDetailClient } from './quote-detail-client'
 
@@ -22,8 +23,11 @@ export default async function QuoteDetailPage({ params }: Props) {
 
   if (error || !quote) notFound()
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://inkbuddy.app'
-  const publicUrl = `${baseUrl}/q/${quote.id}`
+  // Build public URL dynamically from request host
+  const headersList = await headers()
+  const host = headersList.get('host') ?? 'inkbuddycl.vercel.app'
+  const protocol = host.startsWith('localhost') ? 'http' : 'https'
+  const publicUrl = `${protocol}://${host}/q/${quote.id}`
 
   return (
     <QuoteDetailClient

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect } from 'react'
 import { Printer, CheckCircle, XCircle } from 'lucide-react'
 import { QuotePreview } from '@/features/quotes/components'
 import { respondToQuotePublic } from '@/features/quotes/services/quote-service'
@@ -14,6 +14,14 @@ export function PublicQuoteClient({ quote: initial }: Props) {
   const [quote, setQuote] = useState(initial)
   const [isPending, startTransition] = useTransition()
   const [done, setDone] = useState(false)
+
+  // Auto-print if ?print=1 param is in URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('print') === '1') {
+      setTimeout(() => window.print(), 600)
+    }
+  }, [])
 
   function handlePrint() {
     window.print()
@@ -92,9 +100,12 @@ export function PublicQuoteClient({ quote: initial }: Props) {
 
       <style>{`
         @media print {
-          body { background: white !important; }
-          .print\\:hidden { display: none !important; }
+          * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          body { background: white !important; margin: 0; padding: 0; }
+          .quote-document { box-shadow: none !important; border-radius: 0 !important; }
         }
+        .print\\:hidden { }
+        @media print { .print\\:hidden { display: none !important; } }
       `}</style>
     </div>
   )

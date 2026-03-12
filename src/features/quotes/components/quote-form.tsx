@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { MessageCircle } from 'lucide-react'
+import { Building2, MessageCircle } from 'lucide-react'
 import { GlassButton, GlassInput } from '@/shared/components'
 import { createQuote, updateQuote } from '../services/quote-service'
 import {
@@ -11,12 +11,14 @@ import {
   type Quote,
   type CreateQuoteInput,
 } from '../types/quote'
+import type { StudioItem } from '@/features/settings/services/studio-association-service'
 
 interface Props {
   quote?: Quote
+  studios?: StudioItem[]
 }
 
-export function QuoteForm({ quote }: Props) {
+export function QuoteForm({ quote, studios = [] }: Props) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
@@ -51,6 +53,10 @@ export function QuoteForm({ quote }: Props) {
     quote?.whatsapp_reminder_hours ?? [24]
   )
 
+  // Studio (for multi-studio artists)
+  const primaryStudio = studios.find((s) => s.is_primary) ?? studios[0]
+  const [selectedStudioId, setSelectedStudioId] = useState<string>(primaryStudio?.id ?? '')
+
   // Notes
   const [notes, setNotes] = useState(quote?.notes ?? '')
 
@@ -74,6 +80,7 @@ export function QuoteForm({ quote }: Props) {
       client_name: clientName,
       client_phone: clientPhone || undefined,
       client_email: clientEmail || undefined,
+      studio_id: !quote && selectedStudioId ? selectedStudioId : undefined,
       design_description: description || undefined,
       body_placement: bodyPlacement || undefined,
       style: style || undefined,
@@ -108,6 +115,39 @@ export function QuoteForm({ quote }: Props) {
         <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
           {error}
         </div>
+      )}
+
+      {/* Studio picker (only for new quotes with multiple studios) */}
+      {!quote && studios.length > 1 && (
+        <section className="flex flex-col gap-3">
+          <h2 className="text-sm font-semibold text-ink-dark/50 uppercase tracking-wide">
+            Estudio
+          </h2>
+          <div className="flex flex-col gap-2">
+            {studios.map((s) => (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => setSelectedStudioId(s.id)}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-colors ${
+                  selectedStudioId === s.id
+                    ? 'bg-ink-orange/10 border-ink-orange/40 text-ink-dark'
+                    : 'bg-white/20 border-white/20 text-ink-dark/60 hover:bg-white/30'
+                }`}
+              >
+                <Building2 className={`h-4 w-4 shrink-0 ${selectedStudioId === s.id ? 'text-ink-orange' : 'text-ink-dark/30'}`} />
+                <span className="flex-1 text-sm font-medium">{s.name}</span>
+                {s.is_primary && (
+                  <span className="text-[10px] text-ink-dark/40">Principal</span>
+                )}
+                <span className={`h-4 w-4 rounded-full border-2 shrink-0 ${
+                  selectedStudioId === s.id ? 'border-ink-orange bg-ink-orange' : 'border-gray-300'
+                }`} />
+              </button>
+            ))}
+          </div>
+          <div className="border-t border-white/20" />
+        </section>
       )}
 
       {/* Sección Cliente */}

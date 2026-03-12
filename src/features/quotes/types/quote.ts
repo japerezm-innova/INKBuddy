@@ -33,6 +33,7 @@ export interface CreateQuoteInput {
   client_phone?: string
   client_email?: string
   client_id?: string
+  studio_id?: string
   title?: string
   design_description?: string
   body_placement?: string

@@ -16,6 +16,7 @@ const createQuoteSchema = z.object({
   client_phone: z.string().max(50).optional(),
   client_email: z.string().email().optional().or(z.literal('')),
   client_id: z.string().uuid().optional(),
+  studio_id: z.string().uuid().optional(),
   title: z.string().max(200).optional(),
   design_description: z.string().max(2000).optional(),
   body_placement: z.string().max(200).optional(),
@@ -99,7 +100,7 @@ export async function createQuote(
     .from('quotes')
     .insert({
       ...parsed.data,
-      studio_id: profile.studio_id,
+      studio_id: parsed.data.studio_id ?? profile.studio_id,
       created_by: profile.id,
       quote_number: 'COT-TEMP',
       title: parsed.data.title ?? 'Cotización de Tatuaje',

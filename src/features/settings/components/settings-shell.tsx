@@ -9,6 +9,7 @@ import {
   ComingSoonSection,
   CalendarSettings,
   ActivationSettings,
+  StudioAssociationSettings,
 } from '@/features/settings/components'
 import type { Profile } from '@/features/auth/types/auth'
 import type { StudioSettings } from '../types/settings'
@@ -122,6 +123,7 @@ export function SettingsShell() {
 
       <main className="space-y-6">
         <ProfileSettings profile={profile} />
+        <StudioAssociationSettings />
         <AccountSettings profile={profile} />
         {isOwner && (
           <>

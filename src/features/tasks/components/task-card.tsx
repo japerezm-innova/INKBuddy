@@ -50,6 +50,7 @@ const CATEGORY_STYLES: Record<TaskCategory, string> = {
   studio_task: 'bg-ink-orange/10 text-ink-orange',
   client_followup: 'bg-emerald-100/80 text-emerald-700',
   inventory: 'bg-amber-100/80 text-amber-700',
+  social_media: 'bg-pink-100/80 text-pink-700',
   other: 'bg-gray-100/80 text-gray-600',
 }
 

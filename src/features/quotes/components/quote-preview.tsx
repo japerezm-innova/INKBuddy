@@ -126,7 +126,7 @@ export function QuotePreview({ quote, studioName = 'INKBuddy Studio' }: Props) {
         {(quote.estimated_price != null || quote.deposit_amount != null) && (
           <div className="border-t border-gray-100 pt-5">
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">
-              Inversión
+              Pagos
             </p>
             <div className="rounded-xl border border-gray-100 overflow-hidden">
               {quote.estimated_price != null && (
@@ -139,7 +139,7 @@ export function QuotePreview({ quote, studioName = 'INKBuddy Studio' }: Props) {
               )}
               {quote.deposit_amount != null && (
                 <div className="flex justify-between items-center px-4 py-3 border-t border-gray-100">
-                  <span className="text-sm text-gray-600">Depósito / Seña</span>
+                  <span className="text-sm text-gray-600">Depósito / Abono</span>
                   <span className="text-sm font-semibold text-gray-700">
                     {formatPrice(quote.deposit_amount)}
                   </span>

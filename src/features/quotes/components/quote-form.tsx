@@ -258,7 +258,7 @@ export function QuoteForm({ quote, studios = [] }: Props) {
             placeholder="0.00"
           />
           <GlassInput
-            label="Depósito / Seña"
+            label="Depósito / Abono"
             value={depositAmount}
             onChange={(e) => setDepositAmount(e.target.value)}
             type="number"

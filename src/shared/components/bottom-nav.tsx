@@ -20,7 +20,7 @@ const NAV_ITEMS = [
   { label: 'Portfolio', icon: Image,           href: '/portfolio/manage' },
 ] as const
 
-const MORE_PATHS = ['/tasks', '/clients', '/inventory', '/analytics', '/settings']
+const MORE_PATHS = ['/tasks', '/clients', '/inventory', '/quotes', '/analytics', '/settings']
 
 export function BottomNav() {
   const pathname = usePathname()

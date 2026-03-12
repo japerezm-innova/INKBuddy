@@ -9,6 +9,7 @@ import {
   Users,
   Package,
   BarChart3,
+  FileText,
   Settings,
 } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
@@ -17,6 +18,7 @@ const MORE_ITEMS = [
   { label: 'Tareas',        icon: CheckSquare, href: '/tasks' },
   { label: 'Clientes',      icon: Users,       href: '/clients' },
   { label: 'Inventario',    icon: Package,     href: '/inventory' },
+  { label: 'Cotizaciones',  icon: FileText,    href: '/quotes' },
   { label: 'Analytics',     icon: BarChart3,   href: '/analytics' },
   { label: 'Configuracion', icon: Settings,    href: '/settings' },
 ] as const

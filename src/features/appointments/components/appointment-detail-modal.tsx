@@ -19,11 +19,13 @@ import {
   PlayCircle,
   Edit,
   ExternalLink,
+  Trash2,
+  Loader2,
 } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/shared/lib/utils'
 import { useAppointmentStore } from '../store/appointment-store'
-import { updateAppointment } from '../services/appointment-service'
+import { updateAppointment, deleteAppointment } from '../services/appointment-service'
 import { AppointmentStatusBadge } from './appointment-status-badge'
 import { buildGoogleCalendarUrl } from '@/shared/lib/calendar-url'
 import type { Appointment, AppointmentStatus } from '../types/appointment'
@@ -106,6 +108,26 @@ function ModalContent({ appointment, onClose, onUpdate }: ModalContentProps) {
   const [isPending, startTransition] = useTransition()
   const [rescheduling, setRescheduling] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+
+  function handleDelete() {
+    if (!confirmDelete) {
+      setConfirmDelete(true)
+      return
+    }
+    setIsDeleting(true)
+    startTransition(async () => {
+      const result = await deleteAppointment(appointment.id)
+      if (result.error) {
+        setError(result.error)
+        setIsDeleting(false)
+        setConfirmDelete(false)
+      } else {
+        onClose()
+      }
+    })
+  }
 
   const startInputs = toLocalDateTimeInputs(appointment.starts_at)
   const endInputs = toLocalDateTimeInputs(appointment.ends_at)
@@ -178,6 +200,24 @@ function ModalContent({ appointment, onClose, onUpdate }: ModalContentProps) {
           >
             <Edit className="h-4 w-4 text-ink-dark/60" />
           </Link>
+          <button
+            onClick={handleDelete}
+            disabled={isPending}
+            className={cn(
+              'h-8 flex items-center gap-1.5 px-2.5 rounded-xl border transition-colors text-xs font-semibold',
+              confirmDelete
+                ? 'bg-red-500 border-red-500 text-white hover:bg-red-600'
+                : 'bg-white/30 border-white/40 text-red-400 hover:bg-red-50/50'
+            )}
+            aria-label="Eliminar cita"
+          >
+            {isDeleting ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Trash2 className="h-3.5 w-3.5" />
+            )}
+            {confirmDelete ? '¿Confirmar?' : ''}
+          </button>
           <button
             onClick={onClose}
             className="h-8 w-8 flex items-center justify-center rounded-xl bg-white/30 border border-white/40 hover:bg-white/50 transition-colors"

@@ -260,6 +260,28 @@ export async function cancelAppointment(
   return updateAppointment(id, { status: 'cancelled' })
 }
 
+export async function deleteAppointment(
+  id: string
+): Promise<{ error?: string }> {
+  if (!id) return { error: 'ID requerido' }
+
+  const { profile, error: authError } = await getAuthenticatedProfile()
+  if (authError || !profile) return { error: authError ?? 'No autenticado' }
+
+  const supabase = await createClient()
+
+  const { error } = await supabase
+    .from('appointments')
+    .delete()
+    .eq('id', id)
+    .eq('studio_id', profile.studio_id)
+
+  if (error) return { error: error.message }
+
+  revalidatePath('/appointments')
+  return {}
+}
+
 export async function completeAppointment(
   id: string
 ): Promise<{ data?: Appointment; error?: string }> {

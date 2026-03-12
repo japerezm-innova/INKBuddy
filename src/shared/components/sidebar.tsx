@@ -11,6 +11,7 @@ import {
   Image,
   BarChart3,
   Megaphone,
+  FileText,
   Settings,
 } from 'lucide-react'
 import { cn, glass } from '@/shared/lib/utils'
@@ -24,7 +25,8 @@ const NAV_ITEMS = [
   { label: 'Inventario',   icon: Package,         href: '/inventory' },
   { label: 'Portafolio',   icon: Image,           href: '/portfolio/manage' },
   { label: 'Analytics',    icon: BarChart3,       href: '/analytics' },
-  { label: 'Marketing',   icon: Megaphone,       href: '/marketing' },
+  { label: 'Marketing',    icon: Megaphone,       href: '/marketing' },
+  { label: 'Cotizaciones', icon: FileText,        href: '/quotes' },
   { label: 'Configuracion',icon: Settings,        href: '/settings' },
 ] as const
 

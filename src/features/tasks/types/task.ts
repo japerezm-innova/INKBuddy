@@ -5,6 +5,7 @@ export type TaskCategory =
   | 'studio_task'
   | 'client_followup'
   | 'inventory'
+  | 'social_media'
   | 'other'
 
 export interface Task {
@@ -65,5 +66,6 @@ export const TASK_CATEGORY_LABELS: Record<TaskCategory, string> = {
   studio_task: 'Tarea del estudio',
   client_followup: 'Seguimiento cliente',
   inventory: 'Inventario',
+  social_media: 'Redes sociales',
   other: 'Otro',
 }

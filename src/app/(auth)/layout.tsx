@@ -14,12 +14,15 @@ export default function AuthLayout({
       <div className="relative z-10 flex min-h-screen items-center justify-center">
         <div className="mx-4 w-full max-w-md">
           {/* Brand mark */}
-          <div className="flex justify-center mb-6">
+          <div className="flex flex-col items-center mb-6">
             <img
               src="/logo.png"
               alt="InkBuddy Logo"
               className="h-20 w-auto object-contain"
             />
+            <span className="mt-1 text-2xl font-bold text-ink-dark tracking-tight">
+              INKBuddy
+            </span>
           </div>
           {/* Form card */}
           <div className="rounded-3xl border border-white/25 bg-white/30 p-8 shadow-glass-lg backdrop-blur-xl">

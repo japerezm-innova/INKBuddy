@@ -15,7 +15,6 @@ import {
   Settings,
 } from 'lucide-react'
 import { cn, glass } from '@/shared/lib/utils'
-import { useAuth } from '@/features/auth/hooks/use-auth'
 
 const NAV_ITEMS = [
   { label: 'Dashboard',    icon: LayoutDashboard, href: '/dashboard' },
@@ -39,9 +38,13 @@ function getInitials(name: string | null): string {
     .join('')
 }
 
-export function Sidebar() {
+interface SidebarProps {
+  userName: string | null
+  userEmail: string | null
+}
+
+export function Sidebar({ userName, userEmail }: SidebarProps) {
   const pathname = usePathname()
-  const { user, profile } = useAuth()
 
   return (
     <aside
@@ -52,8 +55,12 @@ export function Sidebar() {
       aria-label="Main navigation"
     >
       {/* Logo */}
-      <div className="mb-8 px-2">
-        <span className="text-2xl font-bold text-gradient">INKBuddy</span>
+      <div className="mb-8 px-2 flex items-center justify-center">
+        <img 
+          src="/logo.png" 
+          alt="InkBuddy Logo" 
+          className="h-20 w-auto object-contain hover:scale-105 transition-transform duration-300" 
+        />
       </div>
 
       {/* Navigation */}
@@ -89,14 +96,14 @@ export function Sidebar() {
             className="h-9 w-9 rounded-full gradient-accent shrink-0 flex items-center justify-center text-xs font-bold text-white"
             aria-hidden="true"
           >
-            {getInitials(profile?.full_name ?? null)}
+            {getInitials(userName)}
           </div>
           <div className="min-w-0">
             <p className="text-sm font-medium text-ink-dark truncate">
-              {profile?.full_name ?? 'Cargando...'}
+              {userName ?? 'Cargando...'}
             </p>
             <p className="text-xs text-ink-dark/50 truncate">
-              {user?.email ?? ''}
+              {userEmail ?? ''}
             </p>
           </div>
         </div>

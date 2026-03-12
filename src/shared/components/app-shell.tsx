@@ -8,13 +8,15 @@ import { BottomNav } from './bottom-nav'
 interface AppShellProps {
   children: React.ReactNode
   className?: string
+  userName?: string | null
+  userEmail?: string | null
 }
 
-export function AppShell({ children, className }: AppShellProps) {
+export function AppShell({ children, className, userName, userEmail }: AppShellProps) {
   return (
     <WarmBackground>
       {/* Desktop sidebar */}
-      <Sidebar />
+      <Sidebar userName={userName ?? null} userEmail={userEmail ?? null} />
 
       {/* Main content */}
       <main

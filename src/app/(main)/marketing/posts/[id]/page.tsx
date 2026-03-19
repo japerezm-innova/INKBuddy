@@ -41,7 +41,7 @@ export default async function EditPostPage({ params }: PageProps) {
       </header>
 
       <main className="space-y-6">
-        <PostPlanner />
+        <PostPlanner studioId={profile.studio_id} />
         <MetricsInputForm postId={id} />
       </main>
     </div>

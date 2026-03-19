@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Image, Hash, Clock, Save, ArrowLeft, Sparkles, Copy, X } from 'lucide-react'
+import { useRef } from 'react'
+import { Image, Hash, Clock, Save, ArrowLeft, Sparkles, Copy, X, Upload } from 'lucide-react'
 import { GlassCard, GlassButton, GlassInput } from '@/shared/components'
 import { cn, glass } from '@/shared/lib/utils'
 import Link from 'next/link'
@@ -27,15 +28,18 @@ import type {
   SocialAccount,
   HashtagCollection,
 } from '../types/marketing'
+import { CaptionGenerator } from './caption-generator'
+import { uploadPostImage } from '../services/upload-service'
 
 interface Props {
   existingPost?: SocialPost
+  studioId: string
 }
 
 const POST_TYPES: PostType[] = ['image', 'carousel', 'reel', 'story', 'tiktok_video']
 const POST_STATUSES: PostStatus[] = ['idea', 'draft', 'scheduled', 'posted']
 
-export function PostPlanner({ existingPost }: Props) {
+export function PostPlanner({ existingPost, studioId }: Props) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const portfolioIdParam = searchParams.get('portfolioId')
@@ -58,8 +62,10 @@ export function PostPlanner({ existingPost }: Props) {
 
   const [hashtagInput, setHashtagInput] = useState('')
   const [isSaving, setIsSaving] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showHashtagPicker, setShowHashtagPicker] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Derived
   const selectedAccount = accounts.find((a) => a.id === accountId)
@@ -101,6 +107,18 @@ export function PostPlanner({ existingPost }: Props) {
       setHashtags(suggested.slice(0, 30))
     }
   }, [portfolioIdParam, existingPost])
+
+  async function handleImageUpload(file: File) {
+    setIsUploading(true)
+    setError(null)
+    const { url, error: uploadError } = await uploadPostImage(file, studioId)
+    if (uploadError || !url) {
+      setError(uploadError ?? 'Error subiendo imagen')
+    } else {
+      setImageUrl(url)
+    }
+    setIsUploading(false)
+  }
 
   function addHashtag(tag: string) {
     const normalized = tag.startsWith('#') ? tag : `#${tag}`
@@ -249,8 +267,8 @@ export function PostPlanner({ existingPost }: Props) {
               Imagen
             </h2>
 
-            {imageUrl && (
-              <div className="relative mb-4">
+            {imageUrl ? (
+              <div className="relative">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={imageUrl}
@@ -266,16 +284,56 @@ export function PostPlanner({ existingPost }: Props) {
                   <X className="h-3.5 w-3.5 text-white" aria-hidden="true" />
                 </button>
               </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                onDragOver={(e) => { e.preventDefault(); e.stopPropagation() }}
+                onDrop={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  const file = e.dataTransfer.files[0]
+                  if (file && file.type.startsWith('image/')) handleImageUpload(file)
+                }}
+                disabled={isUploading}
+                className={cn(
+                  'w-full flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-white/30 p-8 transition-colors',
+                  isUploading
+                    ? 'opacity-60 cursor-wait'
+                    : 'hover:border-ink-orange/50 hover:bg-white/5 cursor-pointer'
+                )}
+              >
+                <Upload className="h-8 w-8 text-ink-dark/40" aria-hidden="true" />
+                <span className="text-sm text-ink-dark/60">
+                  {isUploading ? 'Subiendo...' : 'Arrastra una imagen o haz clic para subir'}
+                </span>
+                <span className="text-xs text-ink-dark/30">JPG, PNG, WebP, GIF (max 5MB)</span>
+              </button>
             )}
 
-            <GlassInput
-              type="url"
-              placeholder="https://... URL de la imagen"
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              aria-label="URL de la imagen"
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                if (file) handleImageUpload(file)
+                e.target.value = ''
+              }}
             />
           </GlassCard>
+
+          {/* AI Caption Generator */}
+          <CaptionGenerator
+            imageUrl={imageUrl}
+            platform={platform}
+            onApplyCaption={(c) => setCaption(c)}
+            onApplyHashtags={(tags) => {
+              const merged = Array.from(new Set([...hashtags, ...tags])).slice(0, 30)
+              setHashtags(merged)
+            }}
+          />
 
           {/* Caption */}
           <GlassCard>

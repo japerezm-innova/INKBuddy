@@ -35,7 +35,7 @@ export default async function NewPostPage() {
       </header>
 
       <main>
-        <PostPlanner />
+        <PostPlanner studioId={profile.studio_id} />
       </main>
     </div>
   )

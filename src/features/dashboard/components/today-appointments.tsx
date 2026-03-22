@@ -3,13 +3,15 @@
 import Link from 'next/link'
 import { format, parseISO } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { CalendarX, ChevronRight } from 'lucide-react'
+import { CalendarX, ChevronRight, WifiOff } from 'lucide-react'
 import { GlassCard } from '@/shared/components'
 import { AppointmentStatusBadge } from '@/features/appointments/components/appointment-status-badge'
 import type { Appointment } from '@/features/appointments/types/appointment'
 
 interface TodayAppointmentsProps {
   appointments: Appointment[]
+  isFromCache?: boolean
+  cachedAt?: string | null
 }
 
 function getClientDisplayName(appointment: Appointment): string {
@@ -106,11 +108,21 @@ function EmptyState() {
   )
 }
 
-export function TodayAppointments({ appointments }: TodayAppointmentsProps) {
+export function TodayAppointments({ appointments, isFromCache, cachedAt }: TodayAppointmentsProps) {
+  const cachedTime = cachedAt ? new Date(cachedAt).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' }) : null
+
   return (
     <GlassCard padding="p-5">
       <header className="flex items-center justify-between mb-4">
-        <h2 className="text-base font-bold text-ink-dark">Citas de Hoy</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-base font-bold text-ink-dark">Citas de Hoy</h2>
+          {isFromCache && (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100/60 text-amber-700 text-[10px] font-medium">
+              <WifiOff className="h-2.5 w-2.5" aria-hidden="true" />
+              {cachedTime ? `Cache ${cachedTime}` : 'Offline'}
+            </span>
+          )}
+        </div>
         <Link
           href="/appointments"
           className="text-xs font-medium text-ink-orange hover:text-ink-coral transition-colors duration-200"

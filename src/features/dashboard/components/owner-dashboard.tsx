@@ -8,8 +8,8 @@ import { TodayAppointments } from './today-appointments'
 import { QuickActions } from './quick-actions'
 import type { Profile } from '@/features/auth/types/auth'
 import type { DashboardStats } from '../types/dashboard'
-import type { Appointment } from '@/features/appointments/types/appointment'
-import { getDashboardStats, getTodayAppointments } from '../services/dashboard-service'
+import { getDashboardStats } from '../services/dashboard-service'
+import { useOfflineTodayAppointments } from '@/features/appointments/hooks/use-offline-today'
 
 interface OwnerDashboardProps {
   profile: Profile
@@ -49,9 +49,17 @@ function DashboardSkeleton() {
 
 export function OwnerDashboard({ profile }: OwnerDashboardProps) {
   const [stats, setStats] = useState<DashboardStats | null>(null)
-  const [appointments, setAppointments] = useState<Appointment[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoadingStats, setIsLoadingStats] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  const {
+    appointments,
+    isLoading: isLoadingAppointments,
+    isFromCache,
+    cachedAt,
+  } = useOfflineTodayAppointments()
+
+  const isLoading = isLoadingStats && isLoadingAppointments
 
   const greeting = getGreeting()
   const firstName = profile.full_name?.split(' ')[0] ?? 'Usuario'
@@ -60,14 +68,11 @@ export function OwnerDashboard({ profile }: OwnerDashboardProps) {
   })
 
   useEffect(() => {
-    async function loadData() {
-      setIsLoading(true)
+    async function loadStats() {
+      setIsLoadingStats(true)
       setError(null)
 
-      const [statsResult, appointmentsResult] = await Promise.all([
-        getDashboardStats(),
-        getTodayAppointments(),
-      ])
+      const statsResult = await getDashboardStats()
 
       if (statsResult.error) {
         setError(statsResult.error)
@@ -75,14 +80,10 @@ export function OwnerDashboard({ profile }: OwnerDashboardProps) {
         setStats(statsResult.data)
       }
 
-      if (appointmentsResult.data) {
-        setAppointments(appointmentsResult.data)
-      }
-
-      setIsLoading(false)
+      setIsLoadingStats(false)
     }
 
-    loadData()
+    loadStats()
   }, [])
 
   if (isLoading) return <DashboardSkeleton />
@@ -122,7 +123,7 @@ export function OwnerDashboard({ profile }: OwnerDashboardProps) {
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
         {/* Today's appointments takes more space */}
         <div className="lg:col-span-3">
-          <TodayAppointments appointments={appointments} />
+          <TodayAppointments appointments={appointments} isFromCache={isFromCache} cachedAt={cachedAt} />
         </div>
 
         {/* Quick actions sidebar */}

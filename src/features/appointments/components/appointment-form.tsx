@@ -23,6 +23,9 @@ import {
   getArtists,
 } from '@/features/appointments/services/appointment-service'
 import { buildGoogleCalendarUrl } from '@/shared/lib/calendar-url'
+import { useFormDraft } from '../hooks/use-form-draft'
+import { useNetworkStatus } from '@/shared/lib/offline/network-status'
+import { enqueueOperation } from '@/shared/lib/offline/sync-queue'
 import { ConsentCheckbox } from './consent-checkbox'
 import type { Profile } from '@/features/auth/types/auth'
 import type {
@@ -306,9 +309,19 @@ export function AppointmentForm({ appointment, onSuccess }: AppointmentFormProps
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [successAppointment, setSuccessAppointment] = useState<Appointment | null>(null)
 
+  const [queuedForSync, setQueuedForSync] = useState(false)
+
   const [artists, setArtists] = useState<Profile[]>([])
   const [services, setServices] = useState<Service[]>([])
   const [isLoadingMeta, setIsLoadingMeta] = useState(true)
+
+  const { isOnline } = useNetworkStatus()
+
+  const { hasDraft, clearDraft, restoreDraft } = useFormDraft(
+    form,
+    (restored) => setForm(restored),
+    { key: isEditMode ? undefined : 'inkbuddy:form-draft:appointment' }
+  )
 
   const setField = useCallback(
     <K extends keyof FormState>(key: K, value: FormState[K]) => {
@@ -437,10 +450,19 @@ export function AppointmentForm({ appointment, onSuccess }: AppointmentFormProps
           consent_accepted: form.consent_accepted,
           consent_accepted_at: form.consent_accepted ? new Date().toISOString() : undefined,
         }
+
+        if (!isOnline) {
+          await enqueueOperation('create_appointment', input)
+          await clearDraft()
+          setQueuedForSync(true)
+          return
+        }
+
         const { data, error } = await createAppointment(input)
         if (error) {
           setServerError(error)
         } else if (data) {
+          await clearDraft()
           if (onSuccess) {
             onSuccess(data)
           } else {
@@ -451,6 +473,25 @@ export function AppointmentForm({ appointment, onSuccess }: AppointmentFormProps
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  if (queuedForSync) {
+    return (
+      <div className="flex flex-col items-center gap-5 py-8 text-center">
+        <div className="h-16 w-16 rounded-full bg-amber-100 flex items-center justify-center">
+          <Clock className="h-8 w-8 text-amber-500" />
+        </div>
+        <div>
+          <h3 className="text-lg font-bold text-ink-dark">Cita en cola de sync</h3>
+          <p className="text-sm text-ink-dark/60 mt-1">
+            Se creara automaticamente cuando vuelvas a tener conexion.
+          </p>
+        </div>
+        <GlassButton variant="primary" size="md" onClick={() => router.push('/appointments')}>
+          Ver agenda
+        </GlassButton>
+      </div>
+    )
   }
 
   if (successAppointment) {
@@ -465,6 +506,21 @@ export function AppointmentForm({ appointment, onSuccess }: AppointmentFormProps
   return (
     <form onSubmit={handleSubmit} noValidate aria-label="Formulario de cita">
       <div className="flex flex-col gap-5">
+        {/* --- Draft restoration --- */}
+        {hasDraft && !isEditMode && (
+          <div className="rounded-xl bg-amber-50/60 border border-amber-200/60 px-4 py-3 text-sm flex items-center justify-between">
+            <span className="text-amber-800 font-medium">Tienes un borrador guardado</span>
+            <div className="flex gap-2">
+              <button type="button" onClick={restoreDraft} className="text-ink-orange font-semibold text-xs">
+                Restaurar
+              </button>
+              <button type="button" onClick={clearDraft} className="text-ink-dark/50 text-xs">
+                Descartar
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* --- Client section --- */}
         <fieldset>
           <legend className="text-xs font-semibold text-ink-orange uppercase tracking-wider mb-3">

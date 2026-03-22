@@ -26,6 +26,8 @@ import Link from 'next/link'
 import { cn } from '@/shared/lib/utils'
 import { useAppointmentStore } from '../store/appointment-store'
 import { updateAppointment, deleteAppointment } from '../services/appointment-service'
+import { useNetworkStatus } from '@/shared/lib/offline/network-status'
+import { enqueueOperation } from '@/shared/lib/offline/sync-queue'
 import { AppointmentStatusBadge } from './appointment-status-badge'
 import { buildGoogleCalendarUrl } from '@/shared/lib/calendar-url'
 import type { Appointment, AppointmentStatus } from '../types/appointment'
@@ -110,6 +112,7 @@ function ModalContent({ appointment, onClose, onUpdate }: ModalContentProps) {
   const [error, setError] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const { isOnline } = useNetworkStatus()
 
   function handleDelete() {
     if (!confirmDelete) {
@@ -117,6 +120,13 @@ function ModalContent({ appointment, onClose, onUpdate }: ModalContentProps) {
       return
     }
     setIsDeleting(true)
+
+    if (!isOnline) {
+      enqueueOperation('delete_appointment', { id: appointment.id })
+      onClose()
+      return
+    }
+
     startTransition(async () => {
       const result = await deleteAppointment(appointment.id)
       if (result.error) {
@@ -147,6 +157,13 @@ function ModalContent({ appointment, onClose, onUpdate }: ModalContentProps) {
 
   function handleStatusChange(next: AppointmentStatus) {
     setError(null)
+
+    if (!isOnline) {
+      enqueueOperation('update_appointment', { id: appointment.id, input: { status: next } })
+      onUpdate({ status: next })
+      return
+    }
+
     startTransition(async () => {
       const result = await updateAppointment(appointment.id, { status: next })
       if (result.error) {
@@ -165,6 +182,17 @@ function ModalContent({ appointment, onClose, onUpdate }: ModalContentProps) {
       setError('La hora de fin debe ser despues de la hora de inicio')
       return
     }
+
+    if (!isOnline) {
+      enqueueOperation('update_appointment', {
+        id: appointment.id,
+        input: { starts_at: newStart, ends_at: newEnd },
+      })
+      onUpdate({ starts_at: newStart, ends_at: newEnd })
+      setRescheduling(false)
+      return
+    }
+
     startTransition(async () => {
       const result = await updateAppointment(appointment.id, {
         starts_at: newStart,

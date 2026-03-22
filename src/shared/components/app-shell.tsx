@@ -4,6 +4,7 @@ import { cn } from '@/shared/lib/utils'
 import { WarmBackground } from './warm-background'
 import { Sidebar } from './sidebar'
 import { BottomNav } from './bottom-nav'
+import { OfflineBanner } from '@/shared/lib/offline/offline-banner'
 
 interface AppShellProps {
   children: React.ReactNode
@@ -15,6 +16,8 @@ interface AppShellProps {
 export function AppShell({ children, className, userName, userEmail }: AppShellProps) {
   return (
     <WarmBackground>
+      <OfflineBanner />
+
       {/* Desktop sidebar */}
       <Sidebar userName={userName ?? null} userEmail={userEmail ?? null} />
 

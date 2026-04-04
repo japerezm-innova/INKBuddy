@@ -220,6 +220,15 @@ export function PostPlanner({ existingPost, studioId }: Props) {
                     </option>
                   ))}
                 </select>
+                {accounts.length === 0 && (
+                  <Link
+                    href="/marketing"
+                    className="mt-2 inline-flex items-center gap-1.5 text-xs text-ink-orange hover:text-ink-orange/80 font-medium transition-colors"
+                  >
+                    <span>No tienes cuentas configuradas.</span>
+                    <span className="underline">Agregar cuenta</span>
+                  </Link>
+                )}
               </div>
 
               {/* Post type */}

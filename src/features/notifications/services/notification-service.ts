@@ -5,7 +5,6 @@ import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import type { Profile } from '@/features/auth/types/auth'
 import type { Appointment } from '@/features/appointments/types/appointment'
-import { resend, FROM_EMAIL } from '@/shared/lib/resend'
 import { buildOwnerNotificationEmail, buildClientConfirmationEmail } from './email-templates'
 import { buildGoogleCalendarUrl } from '@/shared/lib/calendar-url'
 import type {
@@ -371,6 +370,7 @@ export async function sendBookingEmails(
   studioName: string,
   ownerEmail: string
 ): Promise<void> {
+  const { resend, FROM_EMAIL } = await import('@/shared/lib/resend')
   if (!process.env.RESEND_API_KEY) return // silently skip if not configured
 
   const calendarUrl = buildGoogleCalendarUrl(appointment)

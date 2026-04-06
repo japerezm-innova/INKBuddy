@@ -5,6 +5,9 @@ import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import type { Profile } from '@/features/auth/types/auth'
 import type { Appointment } from '@/features/appointments/types/appointment'
+import { resend, FROM_EMAIL } from '@/shared/lib/resend'
+import { buildOwnerNotificationEmail, buildClientConfirmationEmail } from './email-templates'
+import { buildGoogleCalendarUrl } from '@/shared/lib/calendar-url'
 import type {
   CreateNotificationInput,
   Notification,
@@ -383,4 +386,47 @@ export async function sendBookingConfirmation(
     template: 'booking_confirmation',
     payload,
   })
+}
+
+// ---------------------------------------------------------------------------
+// Email notifications via Resend (owner + client)
+// ---------------------------------------------------------------------------
+
+export async function sendBookingEmails(
+  appointment: Appointment & {
+    artist?: { id: string; full_name: string | null } | null
+    service?: { id: string; name: string; duration_minutes: number } | null
+  },
+  studioName: string,
+  ownerEmail: string
+): Promise<void> {
+  if (!process.env.RESEND_API_KEY) return // silently skip if not configured
+
+  const calendarUrl = buildGoogleCalendarUrl(appointment)
+  const ownerEmail_ = buildOwnerNotificationEmail(appointment, studioName)
+  const clientEmail = appointment.client_email
+    ? buildClientConfirmationEmail(appointment, studioName, calendarUrl)
+    : null
+
+  const sends: Promise<unknown>[] = [
+    resend.emails.send({
+      from: FROM_EMAIL,
+      to: ownerEmail,
+      subject: ownerEmail_.subject,
+      html: ownerEmail_.html,
+    }),
+  ]
+
+  if (clientEmail && appointment.client_email) {
+    sends.push(
+      resend.emails.send({
+        from: FROM_EMAIL,
+        to: appointment.client_email,
+        subject: clientEmail.subject,
+        html: clientEmail.html,
+      })
+    )
+  }
+
+  await Promise.allSettled(sends) // don't throw — email failure shouldn't break appointment creation
 }

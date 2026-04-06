@@ -76,6 +76,67 @@ async function getAuthenticatedProfile(): Promise<AuthProfileResult> {
 // Public queries (no auth required)
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Public portfolio by studio slug (for shareable URLs)
+// ---------------------------------------------------------------------------
+
+export interface PublicArtistProfile {
+  studioName: string
+  studioSlug: string
+  artistName: string | null
+  artistBio: string | null
+  artistAvatar: string | null
+}
+
+export async function getPublicPortfolioBySlug(slug: string): Promise<{
+  data?: PortfolioItem[]
+  artist?: PublicArtistProfile
+  error?: string
+}> {
+  if (!slug) return { error: 'Slug requerido' }
+
+  const supabase = await createClient()
+
+  // Get studio by slug
+  const { data: studio, error: studioError } = await supabase
+    .from('studios')
+    .select('id, name, slug')
+    .eq('slug', slug)
+    .single()
+
+  if (studioError || !studio) return { error: 'Portafolio no encontrado' }
+
+  // Get studio owner (first owner profile)
+  const { data: ownerProfile } = await supabase
+    .from('profiles')
+    .select('full_name, bio, avatar_url')
+    .eq('studio_id', studio.id)
+    .eq('role', 'owner')
+    .single()
+
+  // Get public portfolio items for this studio
+  const { data: items, error: itemsError } = await supabase
+    .from('portfolio_items')
+    .select('*, artist:profiles!artist_id(id, full_name, avatar_url)')
+    .eq('studio_id', studio.id)
+    .eq('is_public', true)
+    .order('sort_order', { ascending: true })
+    .order('created_at', { ascending: false })
+
+  if (itemsError) return { error: itemsError.message }
+
+  return {
+    data: (items ?? []) as PortfolioItem[],
+    artist: {
+      studioName: studio.name,
+      studioSlug: studio.slug,
+      artistName: ownerProfile?.full_name ?? null,
+      artistBio: ownerProfile?.bio ?? null,
+      artistAvatar: ownerProfile?.avatar_url ?? null,
+    },
+  }
+}
+
 export async function getPublicPortfolio(
   filter?: PortfolioFilter
 ): Promise<{ data?: PortfolioItem[]; error?: string }> {

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useTransition } from 'react'
-import { Plus, X, RefreshCw, ImagePlus } from 'lucide-react'
+import { Plus, X, RefreshCw, ImagePlus, Link2, Check } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import { GlassCard } from '@/shared/components'
 import { PortfolioGrid } from '@/features/portfolio/components'
@@ -11,11 +11,12 @@ import type { PortfolioItem } from '@/features/portfolio/types/portfolio'
 
 type DrawerMode = 'create' | 'edit' | null
 
-export function ManagePortfolioContent() {
+export function ManagePortfolioContent({ studioSlug }: { studioSlug?: string }) {
   const [items, setItems] = useState<PortfolioItem[]>([])
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   const [hasFetched, setHasFetched] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   const [drawerMode, setDrawerMode] = useState<DrawerMode>(null)
   const [editingItem, setEditingItem] = useState<PortfolioItem | null>(null)
@@ -94,10 +95,19 @@ export function ManagePortfolioContent() {
     setDeleteError(null)
   }
 
+  const handleCopyLink = () => {
+    if (!studioSlug) return
+    const url = `${window.location.origin}/portfolio/${studioSlug}`
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }
+
   return (
     <>
       {/* Page header */}
-      <div className="flex items-center justify-between mb-6 gap-4">
+      <div className="flex items-center justify-between mb-4 gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Mi Portafolio</h1>
           <p className="text-sm text-gray-500 mt-0.5">
@@ -119,6 +129,34 @@ export function ManagePortfolioContent() {
           <span className="hidden sm:inline">Agregar</span>
         </button>
       </div>
+
+      {/* Public link bar */}
+      {studioSlug && (
+        <div className="flex items-center gap-2 mb-6 p-3 bg-white/30 backdrop-blur-sm border border-white/30 rounded-2xl">
+          <Link2 className="h-4 w-4 text-ink-orange shrink-0" aria-hidden="true" />
+          <span className="text-xs text-ink-dark/60 truncate flex-1">
+            /portfolio/{studioSlug}
+          </span>
+          <button
+            type="button"
+            onClick={handleCopyLink}
+            className={cn(
+              'inline-flex items-center gap-1.5 h-8 px-3 rounded-xl text-xs font-semibold shrink-0',
+              'transition-all duration-200',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink-orange/50',
+              copied
+                ? 'bg-emerald-500 text-white'
+                : 'bg-ink-orange/10 text-ink-orange hover:bg-ink-orange/20'
+            )}
+          >
+            {copied ? (
+              <><Check className="h-3.5 w-3.5" aria-hidden="true" /> Copiado</>
+            ) : (
+              <><Link2 className="h-3.5 w-3.5" aria-hidden="true" /> Copiar link</>
+            )}
+          </button>
+        </div>
+      )}
 
       {/* Content */}
       {!hasFetched || isPending ? (

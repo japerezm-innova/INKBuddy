@@ -12,6 +12,7 @@ import type {
   UpdateAppointmentInput,
 } from '../types/appointment'
 import type { Profile } from '@/features/auth/types/auth'
+import { sendBookingEmails } from '@/features/notifications/services/notification-service'
 
 // ---------------------------------------------------------------------------
 // Schemas
@@ -212,7 +213,23 @@ export async function createAppointment(
 
   revalidatePath('/appointments')
 
-  return { data: data as Appointment }
+  const appointment = data as Appointment
+
+  // Send email notifications (fire-and-forget — don't block response)
+  if (profile.email) {
+    const supabase2 = await createClient()
+    const { data: studio } = await supabase2
+      .from('studios')
+      .select('name')
+      .eq('id', profile.studio_id)
+      .single()
+
+    sendBookingEmails(appointment, studio?.name ?? 'Tu estudio', profile.email).catch(() => {
+      // swallow email errors — appointment was created successfully
+    })
+  }
+
+  return { data: appointment }
 }
 
 export async function updateAppointment(

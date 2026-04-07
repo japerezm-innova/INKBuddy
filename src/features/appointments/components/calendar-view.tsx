@@ -1,6 +1,7 @@
 'use client'
 
-import { format, parseISO, isSameDay, getHours } from 'date-fns'
+import { useState, useEffect } from 'react'
+import { format, parseISO, isSameDay, getHours, differenceInMinutes } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Plus, CalendarX } from 'lucide-react'
 import Link from 'next/link'
@@ -9,13 +10,42 @@ import { GlassButton } from '@/shared/components'
 import { useCalendar } from '@/features/appointments/hooks/use-calendar'
 import { useAppointments } from '@/features/appointments/hooks/use-appointments'
 import { useAppointmentStore } from '@/features/appointments/store/appointment-store'
-import type { Appointment } from '@/features/appointments/types/appointment'
+import type { Appointment, AppointmentStatus } from '@/features/appointments/types/appointment'
 import { CalendarDaySelector } from './calendar-day-selector'
 import { AppointmentCard } from './appointment-card'
 import { AppointmentDetailModal } from './appointment-detail-modal'
 
 // Hours displayed in the day view timeline
 const TIMELINE_HOURS = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+
+// Status colors for week mini-cards
+const STATUS_BORDER_WEEK: Record<AppointmentStatus, string> = {
+  pending: 'border-l-yellow-400',
+  confirmed: 'border-l-emerald-400',
+  in_progress: 'border-l-blue-500',
+  completed: 'border-l-gray-400',
+  cancelled: 'border-l-red-400',
+  no_show: 'border-l-ink-dark/40',
+}
+
+const STATUS_BG_WEEK: Record<AppointmentStatus, string> = {
+  pending: 'bg-yellow-50/60',
+  confirmed: 'bg-emerald-50/60',
+  in_progress: 'bg-blue-50/60',
+  completed: 'bg-gray-50/60',
+  cancelled: 'bg-red-50/40',
+  no_show: 'bg-gray-100/40',
+}
+
+// Duration label helper
+function getDurationLabel(appointment: Appointment): string | null {
+  const mins = differenceInMinutes(parseISO(appointment.ends_at), parseISO(appointment.starts_at))
+  if (mins <= 30) return 'Consulta'
+  if (mins <= 60) return '1h'
+  const h = Math.floor(mins / 60)
+  const m = mins % 60
+  return m > 0 ? `${h}h${m}m` : `${h}h`
+}
 
 function groupByHour(appointments: Appointment[]): Map<number, Appointment[]> {
   const map = new Map<number, Appointment[]>()
@@ -70,13 +100,54 @@ interface DayViewProps {
   onSelectAppointment: (apt: Appointment) => void
 }
 
+function CurrentTimeLine() {
+  const [now, setNow] = useState(new Date())
+
+  useEffect(() => {
+    const interval = setInterval(() => setNow(new Date()), 60_000)
+    return () => clearInterval(interval)
+  }, [])
+
+  const hour = now.getHours()
+  const minutes = now.getMinutes()
+
+  // Only show if within timeline range
+  if (hour < TIMELINE_HOURS[0]! || hour > TIMELINE_HOURS[TIMELINE_HOURS.length - 1]!) return null
+
+  // Position: each hour slot is min-h-[3.5rem] = 56px
+  const hourIndex = hour - TIMELINE_HOURS[0]!
+  const topPx = hourIndex * 56 + (minutes / 60) * 56
+
+  return (
+    <div
+      className="absolute left-0 right-0 z-10 pointer-events-none flex items-center"
+      style={{ top: `${topPx}px` }}
+      aria-hidden="true"
+    >
+      <div className="w-12 flex justify-end pr-1">
+        <span className="text-[10px] font-bold text-red-500 tabular-nums">
+          {String(hour).padStart(2, '0')}:{String(minutes).padStart(2, '0')}
+        </span>
+      </div>
+      <div className="relative flex items-center flex-1">
+        <div className="h-2.5 w-2.5 rounded-full bg-red-500 -ml-1 shrink-0" />
+        <div className="flex-1 h-[2px] bg-red-500/70" />
+      </div>
+    </div>
+  )
+}
+
 function DayView({ appointments, onSelectAppointment }: DayViewProps) {
   const byHour = groupByHour(appointments)
+  const isToday = isSameDay(new Date(), new Date()) // always true for current render
 
   if (appointments.length === 0) return <EmptyDay />
 
   return (
-    <div className="flex flex-col gap-0">
+    <div className="relative flex flex-col gap-0">
+      {/* Real-time indicator line */}
+      <CurrentTimeLine />
+
       {TIMELINE_HOURS.map((hour) => {
         const apts = byHour.get(hour) ?? []
         return (
@@ -90,13 +161,28 @@ function DayView({ appointments, onSelectAppointment }: DayViewProps) {
 
             {/* Divider + appointments */}
             <div className="flex-1 border-t border-white/20 pt-1 pb-2 flex flex-col gap-2">
-              {apts.map((apt) => (
-                <AppointmentCard
-                  key={apt.id}
-                  appointment={apt}
-                  onClick={onSelectAppointment}
-                />
-              ))}
+              {apts.map((apt) => {
+                const duration = getDurationLabel(apt)
+                return (
+                  <div key={apt.id} className="relative">
+                    <AppointmentCard
+                      appointment={apt}
+                      onClick={onSelectAppointment}
+                    />
+                    {/* Duration badge */}
+                    {duration && (
+                      <span className={cn(
+                        'absolute top-2 right-24 text-[10px] font-medium px-1.5 py-0.5 rounded-md',
+                        differenceInMinutes(parseISO(apt.ends_at), parseISO(apt.starts_at)) <= 30
+                          ? 'bg-violet-100/80 text-violet-700'
+                          : 'bg-sky-100/80 text-sky-700'
+                      )}>
+                        {duration}
+                      </span>
+                    )}
+                  </div>
+                )
+              })}
             </div>
           </div>
         )
@@ -170,8 +256,10 @@ function WeekView({
                     aria-label={`Cita: ${apt.client_name ?? apt.client?.full_name ?? 'Cliente'} - ${format(parseISO(apt.starts_at), 'HH:mm')}`}
                     className={cn(
                       'w-full text-left p-1.5 rounded-xl',
-                      'bg-white/30 border border-white/25 backdrop-blur-sm',
-                      'border-l-2 border-l-ink-orange',
+                      'border border-white/25 backdrop-blur-sm',
+                      'border-l-2',
+                      STATUS_BORDER_WEEK[apt.status],
+                      STATUS_BG_WEEK[apt.status],
                       'hover:bg-white/45 transition-all duration-150',
                       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink-orange/50',
                       'truncate'

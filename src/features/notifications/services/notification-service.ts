@@ -359,7 +359,7 @@ export async function sendBookingConfirmation(
 }
 
 // ---------------------------------------------------------------------------
-// Email notifications via Resend (owner + client)
+// Email notifications via Mailjet SMTP (owner + client)
 // ---------------------------------------------------------------------------
 
 export async function sendBookingEmails(
@@ -370,12 +370,7 @@ export async function sendBookingEmails(
   studioName: string,
   ownerEmail: string
 ): Promise<void> {
-  if (!process.env.RESEND_API_KEY) {
-    console.warn('[INKBuddy] RESEND_API_KEY not set — skipping email')
-    return
-  }
-
-  const { resend, FROM_EMAIL } = await import('@/shared/lib/resend')
+  const { sendEmail } = await import('@/shared/lib/mailer')
 
   const calendarUrl = buildGoogleCalendarUrl(appointment)
   const ownerTemplate = buildOwnerNotificationEmail(appointment, studioName)
@@ -384,22 +379,18 @@ export async function sendBookingEmails(
     : null
 
   // Send to studio owner
-  const ownerResult = await resend.emails.send({
-    from: FROM_EMAIL,
+  await sendEmail({
     to: ownerEmail,
     subject: ownerTemplate.subject,
     html: ownerTemplate.html,
   })
-  console.log('[INKBuddy] Owner email result:', JSON.stringify(ownerResult))
 
   // Send to client if they provided email
   if (clientTemplate && appointment.client_email) {
-    const clientResult = await resend.emails.send({
-      from: FROM_EMAIL,
+    await sendEmail({
       to: appointment.client_email,
       subject: clientTemplate.subject,
       html: clientTemplate.html,
     })
-    console.log('[INKBuddy] Client email result:', JSON.stringify(clientResult))
   }
 }

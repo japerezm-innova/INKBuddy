@@ -59,25 +59,31 @@ export async function getDashboardStats(): Promise<{
   const supabase = await createClient()
   const studioId = profile.studio_id
 
+  // Use Chile timezone for all date calculations
+  const TIMEZONE = 'America/Santiago'
   const now = new Date()
-  const today = now.toISOString().split('T')[0] as string
+  const localDate = new Date(now.toLocaleString('en-US', { timeZone: TIMEZONE }))
+  const yyyy = localDate.getFullYear()
+  const mm = String(localDate.getMonth() + 1).padStart(2, '0')
+  const dd = String(localDate.getDate()).padStart(2, '0')
+  const today = `${yyyy}-${mm}-${dd}`
 
-  // Start of current week (Monday)
-  const startOfWeekDate = new Date(now)
+  // Start of current week (Monday) in local timezone
+  const startOfWeekDate = new Date(localDate)
   const day = startOfWeekDate.getDay()
   const diff = day === 0 ? -6 : 1 - day
   startOfWeekDate.setDate(startOfWeekDate.getDate() + diff)
-  startOfWeekDate.setHours(0, 0, 0, 0)
-  const weekStart = startOfWeekDate.toISOString()
+  const weekStartStr = `${startOfWeekDate.getFullYear()}-${String(startOfWeekDate.getMonth() + 1).padStart(2, '0')}-${String(startOfWeekDate.getDate()).padStart(2, '0')}`
+  const weekStart = `${weekStartStr}T00:00:00-04:00`
 
   // End of current week (Sunday)
   const endOfWeekDate = new Date(startOfWeekDate)
   endOfWeekDate.setDate(endOfWeekDate.getDate() + 6)
-  endOfWeekDate.setHours(23, 59, 59, 999)
-  const weekEnd = endOfWeekDate.toISOString()
+  const weekEndStr = `${endOfWeekDate.getFullYear()}-${String(endOfWeekDate.getMonth() + 1).padStart(2, '0')}-${String(endOfWeekDate.getDate()).padStart(2, '0')}`
+  const weekEnd = `${weekEndStr}T23:59:59-04:00`
 
-  // Start of current month
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+  // Start of current month in local timezone
+  const monthStart = `${yyyy}-${mm}-01T00:00:00-04:00`
 
   // Run all count queries in parallel
   const [
@@ -88,13 +94,13 @@ export async function getDashboardStats(): Promise<{
     pendingResult,
     stockResult,
   ] = await Promise.all([
-    // Appointments today (non-cancelled)
+    // Appointments today (non-cancelled) — timezone-aware
     supabase
       .from('appointments')
       .select('*', { count: 'exact', head: true })
       .eq('studio_id', studioId)
-      .gte('starts_at', `${today}T00:00:00`)
-      .lt('starts_at', `${today}T23:59:59`)
+      .gte('starts_at', `${today}T00:00:00-04:00`)
+      .lt('starts_at', `${today}T23:59:59-04:00`)
       .not('status', 'eq', 'cancelled'),
 
     // Appointments this week (non-cancelled)
@@ -113,12 +119,12 @@ export async function getDashboardStats(): Promise<{
       .eq('studio_id', studioId)
       .gte('created_at', monthStart),
 
-    // Completed appointments this month (for revenue)
+    // All non-cancelled appointments this month (for revenue — counts on booking)
     supabase
       .from('appointments')
       .select('price')
       .eq('studio_id', studioId)
-      .eq('status', 'completed')
+      .not('status', 'eq', 'cancelled')
       .gte('starts_at', monthStart),
 
     // Pending appointments
@@ -178,14 +184,21 @@ export async function getTodayAppointments(): Promise<{
   if (authError || !profile) return { error: authError ?? 'No autenticado' }
 
   const supabase = await createClient()
-  const today = new Date().toISOString().split('T')[0] as string
+
+  // Use Chile timezone for "today"
+  const now = new Date()
+  const localDate = new Date(now.toLocaleString('en-US', { timeZone: 'America/Santiago' }))
+  const yyyy = localDate.getFullYear()
+  const mm = String(localDate.getMonth() + 1).padStart(2, '0')
+  const dd = String(localDate.getDate()).padStart(2, '0')
+  const today = `${yyyy}-${mm}-${dd}`
 
   let query = supabase
     .from('appointments')
     .select(APPOINTMENT_SELECT)
     .eq('studio_id', profile.studio_id)
-    .gte('starts_at', `${today}T00:00:00`)
-    .lt('starts_at', `${today}T23:59:59`)
+    .gte('starts_at', `${today}T00:00:00-04:00`)
+    .lt('starts_at', `${today}T23:59:59-04:00`)
     .not('status', 'eq', 'cancelled')
     .order('starts_at', { ascending: true })
 

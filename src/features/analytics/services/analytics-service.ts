@@ -118,21 +118,21 @@ export async function getAnalyticsData(
     revenueByArtistResult,
     appointmentsByDayResult,
   ] = await Promise.all([
-    // 1. Revenue this month (completed appointments)
+    // 1. Revenue this month (all non-cancelled — revenue counts on booking)
     supabase
       .from('appointments')
       .select('price')
       .eq('studio_id', studioId)
-      .eq('status', 'completed')
+      .not('status', 'eq', 'cancelled')
       .gte('starts_at', thisMonthStart)
       .lte('starts_at', thisMonthEnd),
 
-    // 2. Revenue last month (completed appointments)
+    // 2. Revenue last month (all non-cancelled)
     supabase
       .from('appointments')
       .select('price')
       .eq('studio_id', studioId)
-      .eq('status', 'completed')
+      .not('status', 'eq', 'cancelled')
       .gte('starts_at', lastMonthStart)
       .lte('starts_at', lastMonthEnd),
 

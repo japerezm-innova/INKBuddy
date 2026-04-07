@@ -224,8 +224,8 @@ export async function createAppointment(
       .eq('id', profile.studio_id)
       .single()
 
-    sendBookingEmails(appointment, studio?.name ?? 'Tu estudio', profile.email).catch(() => {
-      // swallow email errors — appointment was created successfully
+    sendBookingEmails(appointment, studio?.name ?? 'Tu estudio', profile.email).catch((err) => {
+      console.error('[INKBuddy] Email send failed:', err)
     })
   }
 

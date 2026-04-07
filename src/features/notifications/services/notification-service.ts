@@ -370,34 +370,36 @@ export async function sendBookingEmails(
   studioName: string,
   ownerEmail: string
 ): Promise<void> {
+  if (!process.env.RESEND_API_KEY) {
+    console.warn('[INKBuddy] RESEND_API_KEY not set — skipping email')
+    return
+  }
+
   const { resend, FROM_EMAIL } = await import('@/shared/lib/resend')
-  if (!process.env.RESEND_API_KEY) return // silently skip if not configured
 
   const calendarUrl = buildGoogleCalendarUrl(appointment)
-  const ownerEmail_ = buildOwnerNotificationEmail(appointment, studioName)
-  const clientEmail = appointment.client_email
+  const ownerTemplate = buildOwnerNotificationEmail(appointment, studioName)
+  const clientTemplate = appointment.client_email
     ? buildClientConfirmationEmail(appointment, studioName, calendarUrl)
     : null
 
-  const sends: Promise<unknown>[] = [
-    resend.emails.send({
+  // Send to studio owner
+  const ownerResult = await resend.emails.send({
+    from: FROM_EMAIL,
+    to: ownerEmail,
+    subject: ownerTemplate.subject,
+    html: ownerTemplate.html,
+  })
+  console.log('[INKBuddy] Owner email result:', JSON.stringify(ownerResult))
+
+  // Send to client if they provided email
+  if (clientTemplate && appointment.client_email) {
+    const clientResult = await resend.emails.send({
       from: FROM_EMAIL,
-      to: ownerEmail,
-      subject: ownerEmail_.subject,
-      html: ownerEmail_.html,
-    }),
-  ]
-
-  if (clientEmail && appointment.client_email) {
-    sends.push(
-      resend.emails.send({
-        from: FROM_EMAIL,
-        to: appointment.client_email,
-        subject: clientEmail.subject,
-        html: clientEmail.html,
-      })
-    )
+      to: appointment.client_email,
+      subject: clientTemplate.subject,
+      html: clientTemplate.html,
+    })
+    console.log('[INKBuddy] Client email result:', JSON.stringify(clientResult))
   }
-
-  await Promise.allSettled(sends) // don't throw — email failure shouldn't break appointment creation
 }

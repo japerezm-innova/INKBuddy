@@ -24,6 +24,7 @@ const taskCategorySchema = z.enum([
   'studio_task',
   'client_followup',
   'inventory',
+  'social_media',
   'other',
 ])
 

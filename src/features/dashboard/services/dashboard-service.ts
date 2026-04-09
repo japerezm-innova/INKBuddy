@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import type { Profile } from '@/features/auth/types/auth'
 import type { Appointment } from '@/features/appointments/types/appointment'
 import type { DashboardStats } from '../types/dashboard'
+import { autoCompleteExpiredAppointments } from '@/features/appointments/services/appointment-service'
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -55,6 +56,9 @@ export async function getDashboardStats(): Promise<{
 }> {
   const { profile, error: authError } = await getAuthenticatedProfile()
   if (authError || !profile) return { error: authError ?? 'No autenticado' }
+
+  // Smart Inventory: auto-complete expired confirmed appointments
+  autoCompleteExpiredAppointments().catch(() => {})
 
   const supabase = await createClient()
   const studioId = profile.studio_id

@@ -13,6 +13,7 @@ import type {
 } from '../types/appointment'
 import type { Profile } from '@/features/auth/types/auth'
 import { sendBookingEmails } from '@/features/notifications/services/notification-service'
+import { _deductStockInternal } from '@/features/inventory/services/inventory-service'
 
 // ---------------------------------------------------------------------------
 // Schemas
@@ -303,6 +304,81 @@ export async function completeAppointment(
   id: string
 ): Promise<{ data?: Appointment; error?: string }> {
   return updateAppointment(id, { status: 'completed' })
+}
+
+// ---------------------------------------------------------------------------
+// Smart Inventory: Auto-complete expired confirmed appointments
+// ---------------------------------------------------------------------------
+
+export async function autoCompleteExpiredAppointments(): Promise<{
+  processed: number
+}> {
+  const { profile, error: authError } = await getAuthenticatedProfile()
+  if (authError || !profile) return { processed: 0 }
+
+  const supabase = await createClient()
+
+  // Check if smart inventory is enabled for this studio
+  const { data: studio } = await supabase
+    .from('studios')
+    .select('settings')
+    .eq('id', profile.studio_id)
+    .single()
+
+  const settings = (studio?.settings ?? {}) as Record<string, unknown>
+  if (!settings.smart_inventory_enabled) return { processed: 0 }
+
+  // Find confirmed appointments past their end time
+  const now = new Date().toISOString()
+  const { data: expiredAppts } = await supabase
+    .from('appointments')
+    .select('id, service_id, artist_id')
+    .eq('studio_id', profile.studio_id)
+    .eq('status', 'confirmed')
+    .lt('ends_at', now)
+
+  if (!expiredAppts || expiredAppts.length === 0) return { processed: 0 }
+
+  let processed = 0
+
+  for (const appt of expiredAppts) {
+    // Mark as completed
+    await supabase
+      .from('appointments')
+      .update({ status: 'completed', updated_at: now })
+      .eq('id', appt.id)
+
+    // Deduct inventory if service has a recipe
+    if (appt.service_id) {
+      const { data: materials } = await supabase
+        .from('service_materials')
+        .select('item_id, quantity_per_session')
+        .eq('service_id', appt.service_id)
+        .eq('studio_id', profile.studio_id)
+
+      if (materials && materials.length > 0) {
+        for (const mat of materials) {
+          await _deductStockInternal(
+            profile.studio_id,
+            mat.item_id,
+            mat.quantity_per_session,
+            appt.id,
+            appt.artist_id ?? profile.id
+          )
+        }
+      }
+    }
+
+    processed++
+  }
+
+  if (processed > 0) {
+    revalidatePath('/appointments')
+    revalidatePath('/inventory')
+    revalidatePath('/dashboard')
+  }
+
+  return { processed }
 }
 
 // ---------------------------------------------------------------------------

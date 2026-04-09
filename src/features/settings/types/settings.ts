@@ -6,6 +6,7 @@ export interface PlatformPreferences {
 
 export interface StudioSettings {
   platforms: PlatformPreferences
+  smart_inventory_enabled?: boolean
 }
 
 export const DEFAULT_STUDIO_SETTINGS: StudioSettings = {
@@ -14,6 +15,7 @@ export const DEFAULT_STUDIO_SETTINGS: StudioSettings = {
     tiktok: false,
     facebook: false,
   },
+  smart_inventory_enabled: false,
 }
 
 export interface ComingSoonFeature {

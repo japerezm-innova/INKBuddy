@@ -389,3 +389,196 @@ export async function adjustStock(
 
   return { data: data as InventoryItem }
 }
+
+// ---------------------------------------------------------------------------
+// Smart Inventory: Toggle setting
+// ---------------------------------------------------------------------------
+
+export async function toggleSmartInventory(enabled: boolean): Promise<void> {
+  const { profile, error: authError } = await getAuthenticatedProfile()
+  if (authError || !profile) return
+
+  const supabase = await createClient()
+
+  // Read current settings
+  const { data: studio } = await supabase
+    .from('studios')
+    .select('settings')
+    .eq('id', profile.studio_id)
+    .single()
+
+  const currentSettings = (studio?.settings ?? {}) as Record<string, unknown>
+
+  await supabase
+    .from('studios')
+    .update({
+      settings: { ...currentSettings, smart_inventory_enabled: enabled },
+    })
+    .eq('id', profile.studio_id)
+
+  revalidatePath('/inventory')
+}
+
+// ---------------------------------------------------------------------------
+// Smart Inventory: Internal deduction (no auth — for auto-complete)
+// ---------------------------------------------------------------------------
+
+export async function _deductStockInternal(
+  studioId: string,
+  itemId: string,
+  quantity: number,
+  appointmentId: string,
+  userId: string
+): Promise<void> {
+  const supabase = await createClient()
+
+  const { data: item } = await supabase
+    .from('inventory_items')
+    .select('current_stock')
+    .eq('id', itemId)
+    .eq('studio_id', studioId)
+    .single()
+
+  if (!item) return
+
+  const newStock = Math.max(0, item.current_stock - quantity)
+
+  await supabase
+    .from('inventory_items')
+    .update({ current_stock: newStock, updated_at: new Date().toISOString() })
+    .eq('id', itemId)
+    .eq('studio_id', studioId)
+
+  await supabase.from('inventory_usage').insert({
+    studio_id: studioId,
+    item_id: itemId,
+    quantity_used: quantity,
+    appointment_id: appointmentId,
+    used_by: userId,
+    used_at: new Date().toISOString(),
+  })
+}
+
+// ---------------------------------------------------------------------------
+// Smart Inventory: Recipes CRUD
+// ---------------------------------------------------------------------------
+
+export interface ServiceMaterial {
+  id: string
+  service_id: string
+  item_id: string
+  quantity_per_session: number
+  studio_id: string
+  item?: { id: string; name: string; category: string; unit: string | null }
+}
+
+export interface ServiceWithRecipeCount {
+  id: string
+  name: string
+  duration_minutes: number
+  is_active: boolean
+  material_count: number
+}
+
+export async function getServicesWithRecipes(): Promise<{
+  data?: ServiceWithRecipeCount[]
+  error?: string
+}> {
+  const { profile, error: authError } = await getAuthenticatedProfile()
+  if (authError || !profile) return { error: authError ?? 'No autenticado' }
+
+  const supabase = await createClient()
+
+  const { data: services, error } = await supabase
+    .from('services')
+    .select('id, name, duration_minutes, is_active')
+    .eq('studio_id', profile.studio_id)
+    .eq('is_active', true)
+    .order('name')
+
+  if (error) return { error: error.message }
+
+  const { data: counts } = await supabase
+    .from('service_materials')
+    .select('service_id')
+    .eq('studio_id', profile.studio_id)
+
+  const countMap = new Map<string, number>()
+  for (const row of counts ?? []) {
+    countMap.set(row.service_id, (countMap.get(row.service_id) ?? 0) + 1)
+  }
+
+  return {
+    data: (services ?? []).map((s) => ({
+      ...s,
+      material_count: countMap.get(s.id) ?? 0,
+    })),
+  }
+}
+
+export async function getServiceMaterials(
+  serviceId: string
+): Promise<{ data?: ServiceMaterial[]; error?: string }> {
+  const { profile, error: authError } = await getAuthenticatedProfile()
+  if (authError || !profile) return { error: authError ?? 'No autenticado' }
+
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from('service_materials')
+    .select('*, item:inventory_items!item_id(id, name, category, unit)')
+    .eq('service_id', serviceId)
+    .eq('studio_id', profile.studio_id)
+    .order('created_at')
+
+  if (error) return { error: error.message }
+  return { data: (data ?? []) as ServiceMaterial[] }
+}
+
+export async function upsertServiceMaterial(
+  serviceId: string,
+  itemId: string,
+  quantity: number
+): Promise<{ error?: string }> {
+  const { profile, error: authError } = await getAuthenticatedProfile()
+  if (authError || !profile) return { error: authError ?? 'No autenticado' }
+
+  if (quantity < 1) return { error: 'La cantidad debe ser al menos 1' }
+
+  const supabase = await createClient()
+
+  const { error } = await supabase.from('service_materials').upsert(
+    {
+      service_id: serviceId,
+      item_id: itemId,
+      quantity_per_session: quantity,
+      studio_id: profile.studio_id,
+    },
+    { onConflict: 'service_id,item_id' }
+  )
+
+  if (error) return { error: error.message }
+  revalidatePath('/inventory/recipes')
+  return {}
+}
+
+export async function deleteServiceMaterial(
+  serviceId: string,
+  itemId: string
+): Promise<{ error?: string }> {
+  const { profile, error: authError } = await getAuthenticatedProfile()
+  if (authError || !profile) return { error: authError ?? 'No autenticado' }
+
+  const supabase = await createClient()
+
+  const { error } = await supabase
+    .from('service_materials')
+    .delete()
+    .eq('service_id', serviceId)
+    .eq('item_id', itemId)
+    .eq('studio_id', profile.studio_id)
+
+  if (error) return { error: error.message }
+  revalidatePath('/inventory/recipes')
+  return {}
+}

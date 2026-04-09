@@ -100,7 +100,7 @@ export function SmartInventoryToggle({ initialEnabled, onToggle }: Props) {
         >
           <Settings2 className="h-4 w-4 text-ink-orange shrink-0" aria-hidden="true" />
           <span className="text-xs font-medium text-ink-dark/70 group-hover:text-ink-dark">
-            Configurar recetas de insumos por servicio
+            Configuracion de insumos por servicio
           </span>
         </Link>
       )}

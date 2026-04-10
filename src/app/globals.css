@@ -103,6 +103,34 @@
     --ink-cream: #F8F0EB;
   }
   html[data-theme="dreamy"] body { background-color: #F8F0EB; }
+
+  /* ---- Theme: Blackwork — True dark mode ---- */
+  html[data-theme="blackwork"] {
+    --background: 240 10% 7%;
+    --foreground: 0 0% 90%;
+    --card: 240 8% 12%;
+    --card-foreground: 0 0% 90%;
+    --popover: 240 8% 12%;
+    --popover-foreground: 0 0% 90%;
+    --primary: 0 0% 85%;
+    --primary-foreground: 240 10% 10%;
+    --secondary: 0 0% 70%;
+    --secondary-foreground: 240 10% 10%;
+    --muted: 240 6% 16%;
+    --muted-foreground: 240 5% 55%;
+    --border: 240 6% 18%;
+    --input: 240 6% 18%;
+    --ring: 0 0% 70%;
+    --ink-orange: #C0C0C0;
+    --ink-coral: #A0A0A0;
+    --ink-peach: #808080;
+    --ink-pink: #909090;
+    --ink-cream: #0D0D14;
+  }
+  html[data-theme="blackwork"] body {
+    background-color: #0D0D14;
+    color: hsl(0 0% 90%);
+  }
 }
 
 @layer base {
@@ -259,6 +287,67 @@ html[data-theme="dreamy"] .animate-blob {
 }
 html[data-theme="dreamy"] .animate-blob-slow {
   animation: dreamy-float 16s ease-in-out infinite;
+}
+
+/* Blackwork: dark gradients and subtle glow */
+html[data-theme="blackwork"] .gradient-warm {
+  background: linear-gradient(135deg, #0D0D14 0%, #12121C 30%, #161622 60%, #1A1A28 100%);
+}
+html[data-theme="blackwork"] .gradient-accent {
+  background: linear-gradient(135deg, #404050 0%, #555568 50%, #484858 100%);
+}
+html[data-theme="blackwork"] .gradient-blob-1 {
+  background: radial-gradient(circle, rgba(120, 120, 150, 0.2) 0%, transparent 70%);
+}
+html[data-theme="blackwork"] .gradient-blob-2 {
+  background: radial-gradient(circle, rgba(100, 100, 130, 0.15) 0%, transparent 70%);
+}
+html[data-theme="blackwork"] .gradient-blob-3 {
+  background: radial-gradient(circle, rgba(110, 110, 140, 0.15) 0%, transparent 70%);
+}
+html[data-theme="blackwork"] .text-gradient {
+  background-image: linear-gradient(135deg, #D0D0D0, #888);
+}
+/* Blackwork: glass overrides for dark surfaces */
+html[data-theme="blackwork"] .glass,
+html[data-theme="blackwork"] .glass-card,
+html[data-theme="blackwork"] .glass-subtle {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+html[data-theme="blackwork"] .glass-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+html[data-theme="blackwork"] .glass-nav {
+  background: rgba(255, 255, 255, 0.04);
+  border-top-color: rgba(255, 255, 255, 0.08);
+}
+html[data-theme="blackwork"] .glass-sidebar {
+  background: rgba(255, 255, 255, 0.04);
+  border-right-color: rgba(255, 255, 255, 0.08);
+}
+/* Blackwork: text color overrides */
+html[data-theme="blackwork"] .text-ink-dark {
+  color: #E0E0E0;
+}
+html[data-theme="blackwork"] .text-gray-800,
+html[data-theme="blackwork"] .text-gray-700,
+html[data-theme="blackwork"] .text-gray-600 {
+  color: #C0C0C0;
+}
+html[data-theme="blackwork"] .text-gray-500,
+html[data-theme="blackwork"] .text-gray-400 {
+  color: #888;
+}
+html[data-theme="blackwork"] .bg-white\/30,
+html[data-theme="blackwork"] .bg-white\/25,
+html[data-theme="blackwork"] .bg-white\/20 {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+html[data-theme="blackwork"] .border-white\/25,
+html[data-theme="blackwork"] .border-white\/20,
+html[data-theme="blackwork"] .border-white\/30 {
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
 @layer utilities {

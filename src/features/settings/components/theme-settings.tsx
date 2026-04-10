@@ -5,7 +5,7 @@ import { Palette, Check } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import { GlassCard } from '@/shared/components'
 
-export type ThemeId = 'original' | 'fusion' | 'fluid' | 'aurora' | 'dreamy'
+export type ThemeId = 'original' | 'fusion' | 'fluid' | 'aurora' | 'dreamy' | 'blackwork'
 
 interface ThemeOption {
   id: ThemeId
@@ -44,6 +44,12 @@ const THEMES: ThemeOption[] = [
     name: 'Dreamy',
     description: 'Pasteles suaves, etereo y sereno',
     colors: ['#E8845C', '#E8A0B0', '#B088D0', '#F8F0EB'],
+  },
+  {
+    id: 'blackwork',
+    name: 'Blackwork',
+    description: 'Modo oscuro, menos fatiga visual',
+    colors: ['#0D0D14', '#1A1A28', '#404050', '#C0C0C0'],
   },
 ]
 
@@ -87,7 +93,7 @@ export function ThemeSettings({ currentTheme, onThemeChange }: Props) {
         Elige el estilo visual de tu estudio
       </p>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
         {THEMES.map((theme) => {
           const isActive = selected === theme.id
           return (

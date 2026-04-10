@@ -5,7 +5,7 @@ import { Palette, Check } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import { GlassCard } from '@/shared/components'
 
-export type ThemeId = 'original' | 'blackwork' | 'oldschool' | 'neotrad'
+export type ThemeId = 'original' | 'fusion' | 'fluid' | 'aurora' | 'dreamy'
 
 interface ThemeOption {
   id: ThemeId
@@ -18,26 +18,32 @@ const THEMES: ThemeOption[] = [
   {
     id: 'original',
     name: 'INKBuddy Original',
-    description: 'Coral y naranjo fresco',
+    description: 'Coral y naranjo, calido y fresco',
     colors: ['#FF6B35', '#FF8C61', '#FF6B8A', '#FFF5EE'],
   },
   {
-    id: 'blackwork',
-    name: 'Blackwork',
-    description: 'Modo oscuro elegante',
-    colors: ['#121218', '#333344', '#666677', '#E0E0E0'],
+    id: 'fusion',
+    name: 'Fusion',
+    description: 'Lavanda y cristal futurista',
+    colors: ['#8B6CC1', '#A78BDB', '#7C8FD4', '#F4F0FA'],
   },
   {
-    id: 'oldschool',
-    name: 'Old School',
-    description: 'Crema, rojo y verde vintage',
-    colors: ['#B83030', '#4A8C5C', '#D4A574', '#F5F0E8'],
+    id: 'fluid',
+    name: 'Fluid',
+    description: 'Azul-violeta vibrante, en movimiento',
+    colors: ['#4A6CF7', '#7B5FE8', '#38BDF8', '#EEF0FF'],
   },
   {
-    id: 'neotrad',
-    name: 'Neo-Traditional',
-    description: 'Purpura y dorado vibrante',
-    colors: ['#7B3FA0', '#D44B7A', '#D4A44C', '#F8F4FF'],
+    id: 'aurora',
+    name: 'Aurora',
+    description: 'Rosa profundo, sofisticado y moody',
+    colors: ['#D44B7A', '#C060A0', '#9B6BBF', '#FBF0F5'],
+  },
+  {
+    id: 'dreamy',
+    name: 'Dreamy',
+    description: 'Pasteles suaves, etereo y sereno',
+    colors: ['#E8845C', '#E8A0B0', '#B088D0', '#F8F0EB'],
   },
 ]
 

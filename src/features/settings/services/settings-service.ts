@@ -165,3 +165,31 @@ export async function updateStudioSettings(
   revalidatePath('/marketing')
   return { data: data.settings as StudioSettings }
 }
+
+export async function updateStudioTheme(
+  theme: string
+): Promise<void> {
+  const { studioId, error: authError } = await getAuthenticatedStudioId()
+  if (authError || !studioId) return
+
+  const supabase = await createClient()
+
+  // Read current settings and merge theme
+  const { data: studio } = await supabase
+    .from('studios')
+    .select('settings')
+    .eq('id', studioId)
+    .single()
+
+  const current = (studio?.settings ?? {}) as Record<string, unknown>
+
+  await supabase
+    .from('studios')
+    .update({
+      settings: { ...current, theme },
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', studioId)
+
+  revalidatePath('/settings')
+}

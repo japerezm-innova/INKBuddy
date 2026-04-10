@@ -11,6 +11,9 @@ import {
   ActivationSettings,
   StudioAssociationSettings,
 } from '@/features/settings/components'
+import { ThemeSettings } from './theme-settings'
+import type { ThemeId } from './theme-settings'
+import { updateStudioTheme } from '../services/settings-service'
 import type { Profile } from '@/features/auth/types/auth'
 import type { StudioSettings } from '../types/settings'
 import { DEFAULT_STUDIO_SETTINGS } from '../types/settings'
@@ -67,6 +70,7 @@ export function SettingsShell() {
   const [studioSettings, setStudioSettings] = useState<StudioSettings>(DEFAULT_STUDIO_SETTINGS)
   const [calendarToken, setCalendarToken] = useState<string | null>(null)
   const [studioPlan, setStudioPlan] = useState<string>('free')
+  const [studioTheme, setStudioTheme] = useState<ThemeId>('original')
   const [status, setStatus] = useState<'loading' | 'ready' | 'unauthenticated'>('loading')
 
   useEffect(() => {
@@ -93,6 +97,7 @@ export function SettingsShell() {
           })
           setCalendarToken(data.profile.studio?.calendar_token ?? null)
           setStudioPlan(data.profile.studio?.plan ?? 'free')
+          setStudioTheme(((raw as Record<string, unknown>).theme as ThemeId) ?? 'original')
           setStatus('ready')
         }
       })
@@ -123,6 +128,7 @@ export function SettingsShell() {
 
       <main className="space-y-6">
         <ProfileSettings profile={profile} />
+        <ThemeSettings currentTheme={studioTheme} onThemeChange={updateStudioTheme} />
         <StudioAssociationSettings />
         <AccountSettings profile={profile} />
         {isOwner && (

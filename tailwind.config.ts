@@ -9,11 +9,11 @@ const config: Config = {
     extend: {
       colors: {
         ink: {
-          orange: '#FF6B35',
-          coral: '#FF8C61',
-          peach: '#FFB088',
-          pink: '#FF6B8A',
-          cream: '#FFF5EE',
+          orange: 'var(--ink-orange)',
+          coral: 'var(--ink-coral)',
+          peach: 'var(--ink-peach)',
+          pink: 'var(--ink-pink)',
+          cream: 'var(--ink-cream)',
           'warm-gray': '#F7F0EB',
           'dark': '#1A1A2E',
           'dark-soft': '#2D2D44',
@@ -27,11 +27,11 @@ const config: Config = {
         '3xl': '64px',
       },
       boxShadow: {
-        'glass': '0 8px 32px rgba(255, 107, 53, 0.1)',
-        'glass-lg': '0 16px 48px rgba(255, 107, 53, 0.15)',
+        'glass': '0 8px 32px color-mix(in srgb, var(--ink-orange) 10%, transparent)',
+        'glass-lg': '0 16px 48px color-mix(in srgb, var(--ink-orange) 15%, transparent)',
         'glass-inset': 'inset 0 1px 1px rgba(255, 255, 255, 0.3)',
-        'warm': '0 4px 24px rgba(255, 107, 53, 0.2)',
-        'warm-lg': '0 8px 40px rgba(255, 107, 53, 0.25)',
+        'warm': '0 4px 24px color-mix(in srgb, var(--ink-orange) 20%, transparent)',
+        'warm-lg': '0 8px 40px color-mix(in srgb, var(--ink-orange) 25%, transparent)',
       },
       animation: {
         'blob': 'blob 7s infinite',

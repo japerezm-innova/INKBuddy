@@ -48,8 +48,8 @@ const THEMES: ThemeOption[] = [
   {
     id: 'blackwork',
     name: 'Blackwork',
-    description: 'Modo oscuro, menos fatiga visual',
-    colors: ['#0D0D14', '#1A1A28', '#404050', '#C0C0C0'],
+    description: 'Dark mode premium, capas de elevacion',
+    colors: ['#0B0E14', '#161B22', '#21262D', '#F0F6FC'],
   },
 ]
 

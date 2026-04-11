@@ -104,32 +104,32 @@
   }
   html[data-theme="dreamy"] body { background-color: #F8F0EB; }
 
-  /* ---- Theme: Blackwork — True dark mode ---- */
+  /* ---- Theme: Blackwork — Premium dark mode with layered elevation ---- */
   html[data-theme="blackwork"] {
-    --background: 240 10% 7%;
-    --foreground: 0 0% 90%;
-    --card: 240 8% 12%;
-    --card-foreground: 0 0% 90%;
-    --popover: 240 8% 12%;
-    --popover-foreground: 0 0% 90%;
-    --primary: 0 0% 85%;
-    --primary-foreground: 240 10% 10%;
-    --secondary: 0 0% 70%;
-    --secondary-foreground: 240 10% 10%;
-    --muted: 240 6% 16%;
-    --muted-foreground: 240 5% 55%;
-    --border: 240 6% 18%;
-    --input: 240 6% 18%;
-    --ring: 0 0% 70%;
-    --ink-orange: #C0C0C0;
-    --ink-coral: #A0A0A0;
-    --ink-peach: #808080;
-    --ink-pink: #909090;
-    --ink-cream: #0D0D14;
+    --background: 215 28% 4%;       /* #0B0E14 */
+    --foreground: 210 20% 96%;      /* #F0F6FC */
+    --card: 215 20% 9%;             /* #161B22 — elevated surface */
+    --card-foreground: 210 20% 96%;
+    --popover: 215 18% 11%;         /* #1C2128 */
+    --popover-foreground: 210 20% 96%;
+    --primary: 210 10% 70%;
+    --primary-foreground: 215 28% 6%;
+    --secondary: 210 10% 55%;
+    --secondary-foreground: 215 28% 6%;
+    --muted: 215 15% 13%;           /* #21262D — hover/muted layer */
+    --muted-foreground: 215 10% 55%; /* #8B949E — dim text */
+    --border: 215 12% 16%;          /* subtle border */
+    --input: 215 12% 16%;
+    --ring: 210 10% 60%;
+    --ink-orange: #C9D1D9;          /* bright neutral for accents */
+    --ink-coral: #8B949E;
+    --ink-peach: #6E7681;
+    --ink-pink: #8B949E;
+    --ink-cream: #0B0E14;
   }
   html[data-theme="blackwork"] body {
-    background-color: #0D0D14;
-    color: hsl(0 0% 90%);
+    background-color: #0B0E14;
+    color: #F0F6FC;
   }
 }
 
@@ -289,66 +289,113 @@ html[data-theme="dreamy"] .animate-blob-slow {
   animation: dreamy-float 16s ease-in-out infinite;
 }
 
-/* Blackwork: dark gradients and subtle glow */
+/* Blackwork: layered dark gradients */
 html[data-theme="blackwork"] .gradient-warm {
-  background: linear-gradient(135deg, #0D0D14 0%, #12121C 30%, #161622 60%, #1A1A28 100%);
+  background: linear-gradient(135deg, #0B0E14 0%, #0F1218 30%, #12161E 60%, #161B22 100%);
 }
 html[data-theme="blackwork"] .gradient-accent {
-  background: linear-gradient(135deg, #404050 0%, #555568 50%, #484858 100%);
+  background: linear-gradient(135deg, #30363D 0%, #484F58 50%, #3A414A 100%);
 }
 html[data-theme="blackwork"] .gradient-blob-1 {
-  background: radial-gradient(circle, rgba(120, 120, 150, 0.2) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(56, 130, 220, 0.08) 0%, transparent 70%);
 }
 html[data-theme="blackwork"] .gradient-blob-2 {
-  background: radial-gradient(circle, rgba(100, 100, 130, 0.15) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(130, 80, 200, 0.06) 0%, transparent 70%);
 }
 html[data-theme="blackwork"] .gradient-blob-3 {
-  background: radial-gradient(circle, rgba(110, 110, 140, 0.15) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(60, 160, 180, 0.06) 0%, transparent 70%);
 }
 html[data-theme="blackwork"] .text-gradient {
-  background-image: linear-gradient(135deg, #D0D0D0, #888);
+  background-image: linear-gradient(135deg, #F0F6FC, #8B949E);
 }
-/* Blackwork: glass overrides for dark surfaces */
-html[data-theme="blackwork"] .glass,
-html[data-theme="blackwork"] .glass-card,
-html[data-theme="blackwork"] .glass-subtle {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.08);
+
+/* Blackwork: elevated card surfaces with layering */
+html[data-theme="blackwork"] .glass {
+  background: #161B22;
+  border-color: #21262D;
+}
+html[data-theme="blackwork"] .glass-card {
+  background: #161B22;
+  border-color: #21262D;
 }
 html[data-theme="blackwork"] .glass-card:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: #1C2128;
+  border-color: #30363D;
+}
+html[data-theme="blackwork"] .glass-subtle {
+  background: #12161E;
+  border-color: #1C2128;
 }
 html[data-theme="blackwork"] .glass-nav {
-  background: rgba(255, 255, 255, 0.04);
-  border-top-color: rgba(255, 255, 255, 0.08);
+  background: #161B22;
+  border-top-color: #21262D;
 }
 html[data-theme="blackwork"] .glass-sidebar {
-  background: rgba(255, 255, 255, 0.04);
-  border-right-color: rgba(255, 255, 255, 0.08);
+  background: #0D1117;
+  border-right-color: #21262D;
 }
-/* Blackwork: text color overrides */
+
+/* Blackwork: text hierarchy */
 html[data-theme="blackwork"] .text-ink-dark {
-  color: #E0E0E0;
+  color: #F0F6FC;
 }
 html[data-theme="blackwork"] .text-gray-800,
-html[data-theme="blackwork"] .text-gray-700,
+html[data-theme="blackwork"] .text-gray-700 {
+  color: #E6EDF3;
+}
 html[data-theme="blackwork"] .text-gray-600 {
-  color: #C0C0C0;
+  color: #C9D1D9;
 }
-html[data-theme="blackwork"] .text-gray-500,
+html[data-theme="blackwork"] .text-gray-500 {
+  color: #8B949E;
+}
 html[data-theme="blackwork"] .text-gray-400 {
-  color: #888;
+  color: #6E7681;
 }
+
+/* Blackwork: surface overrides for white-alpha utilities */
 html[data-theme="blackwork"] .bg-white\/30,
 html[data-theme="blackwork"] .bg-white\/25,
 html[data-theme="blackwork"] .bg-white\/20 {
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: #161B22;
+}
+html[data-theme="blackwork"] .bg-white\/40,
+html[data-theme="blackwork"] .bg-white\/45 {
+  background-color: #1C2128;
+}
+html[data-theme="blackwork"] .bg-white\/15,
+html[data-theme="blackwork"] .bg-white\/10 {
+  background-color: #12161E;
 }
 html[data-theme="blackwork"] .border-white\/25,
 html[data-theme="blackwork"] .border-white\/20,
 html[data-theme="blackwork"] .border-white\/30 {
-  border-color: rgba(255, 255, 255, 0.08);
+  border-color: #21262D;
 }
+html[data-theme="blackwork"] .border-white\/15 {
+  border-color: #1C2128;
+}
+html[data-theme="blackwork"] .hover\:bg-white\/30:hover,
+html[data-theme="blackwork"] .hover\:bg-white\/40:hover,
+html[data-theme="blackwork"] .hover\:bg-white\/45:hover {
+  background-color: #21262D;
+}
+
+/* Blackwork: input and select styling */
+html[data-theme="blackwork"] select,
+html[data-theme="blackwork"] input,
+html[data-theme="blackwork"] textarea {
+  background-color: #0D1117;
+  color: #F0F6FC;
+  border-color: #21262D;
+}
+
+/* Blackwork: status badge backgrounds — subtle tints on dark */
+html[data-theme="blackwork"] .bg-yellow-100\/80 { background-color: rgba(210, 153, 34, 0.15); }
+html[data-theme="blackwork"] .bg-emerald-100\/80 { background-color: rgba(46, 160, 67, 0.15); }
+html[data-theme="blackwork"] .bg-blue-100\/80 { background-color: rgba(56, 132, 244, 0.15); }
+html[data-theme="blackwork"] .bg-red-100\/80 { background-color: rgba(218, 54, 51, 0.15); }
+html[data-theme="blackwork"] .bg-gray-100\/80 { background-color: rgba(110, 118, 129, 0.15); }
 
 @layer utilities {
   .animate-blob {

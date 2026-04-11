@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import { cn } from '@/shared/lib/utils'
 import { WarmBackground } from './warm-background'
 import { Sidebar } from './sidebar'
@@ -14,6 +15,22 @@ interface AppShellProps {
 }
 
 export function AppShell({ children, className, userName, userEmail }: AppShellProps) {
+  // Sync theme from Supabase on mount (fills localStorage if empty)
+  useEffect(() => {
+    fetch('/api/me')
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => {
+        const theme = data?.profile?.studio?.settings?.theme
+        if (theme && theme !== 'original') {
+          document.documentElement.setAttribute('data-theme', theme)
+          localStorage.setItem('inkbuddy-theme', theme)
+        } else if (!theme || theme === 'original') {
+          document.documentElement.removeAttribute('data-theme')
+          localStorage.removeItem('inkbuddy-theme')
+        }
+      })
+      .catch(() => {})
+  }, [])
   return (
     <WarmBackground>
       <OfflineBanner />

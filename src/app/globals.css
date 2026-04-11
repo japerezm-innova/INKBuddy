@@ -289,108 +289,114 @@ html[data-theme="dreamy"] .animate-blob-slow {
   animation: dreamy-float 16s ease-in-out infinite;
 }
 
-/* Blackwork: layered dark gradients */
+/* Blackwork: dark base with NO gradient — pure solid for lava lamp contrast */
 html[data-theme="blackwork"] .gradient-warm {
-  background: linear-gradient(135deg, #0B0E14 0%, #0F1218 30%, #12161E 60%, #161B22 100%);
+  background: #0B0E14;
 }
 html[data-theme="blackwork"] .gradient-accent {
   background: linear-gradient(135deg, #30363D 0%, #484F58 50%, #3A414A 100%);
 }
+/* Blackwork: lava lamp blobs — vivid colors for glass contrast */
 html[data-theme="blackwork"] .gradient-blob-1 {
-  background: radial-gradient(circle, rgba(56, 130, 220, 0.08) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(90, 50, 200, 0.35) 0%, rgba(60, 30, 150, 0.1) 50%, transparent 70%);
 }
 html[data-theme="blackwork"] .gradient-blob-2 {
-  background: radial-gradient(circle, rgba(130, 80, 200, 0.06) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(200, 50, 100, 0.3) 0%, rgba(150, 30, 80, 0.08) 50%, transparent 70%);
 }
 html[data-theme="blackwork"] .gradient-blob-3 {
-  background: radial-gradient(circle, rgba(60, 160, 180, 0.06) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(30, 140, 200, 0.3) 0%, rgba(20, 100, 150, 0.08) 50%, transparent 70%);
 }
 html[data-theme="blackwork"] .text-gradient {
-  background-image: linear-gradient(135deg, #F0F6FC, #8B949E);
+  background-image: linear-gradient(135deg, #F0F6FC, #C9D1D9);
+}
+/* Blackwork: slower lava lamp drift */
+html[data-theme="blackwork"] .animate-blob {
+  animation: blob-morph 14s ease-in-out infinite;
+}
+html[data-theme="blackwork"] .animate-blob-slow {
+  animation: blob-morph 20s ease-in-out infinite;
 }
 
-/* Blackwork: elevated card surfaces with layering */
-html[data-theme="blackwork"] .glass {
-  background: #161B22;
-  border-color: #21262D;
-}
-html[data-theme="blackwork"] .glass-card {
-  background: #161B22;
-  border-color: #21262D;
+/* Blackwork: TRANSPARENT glass — see the lava through cards */
+html[data-theme="blackwork"] .glass,
+html[data-theme="blackwork"] .glass-card,
+html[data-theme="blackwork"] .glass-subtle {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 html[data-theme="blackwork"] .glass-card:hover {
-  background: #1C2128;
-  border-color: #30363D;
-}
-html[data-theme="blackwork"] .glass-subtle {
-  background: #12161E;
-  border-color: #1C2128;
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 html[data-theme="blackwork"] .glass-nav {
-  background: #161B22;
-  border-top-color: #21262D;
+  background: rgba(11, 14, 20, 0.8);
+  border-top-color: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 html[data-theme="blackwork"] .glass-sidebar {
-  background: #0D1117;
-  border-right-color: #21262D;
+  background: rgba(11, 14, 20, 0.85);
+  border-right-color: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
-/* Blackwork: text hierarchy */
+/* Blackwork: ALL text bright white — no gray on dark */
 html[data-theme="blackwork"] .text-ink-dark {
   color: #F0F6FC;
 }
 html[data-theme="blackwork"] .text-gray-800,
-html[data-theme="blackwork"] .text-gray-700 {
+html[data-theme="blackwork"] .text-gray-700,
+html[data-theme="blackwork"] .text-gray-600 {
   color: #E6EDF3;
 }
-html[data-theme="blackwork"] .text-gray-600 {
+html[data-theme="blackwork"] .text-gray-500 {
   color: #C9D1D9;
 }
-html[data-theme="blackwork"] .text-gray-500 {
-  color: #8B949E;
-}
 html[data-theme="blackwork"] .text-gray-400 {
-  color: #6E7681;
+  color: #A0AAB4;
 }
 
-/* Blackwork: surface overrides for white-alpha utilities */
+/* Blackwork: transparent surfaces — let lava show through */
 html[data-theme="blackwork"] .bg-white\/30,
 html[data-theme="blackwork"] .bg-white\/25,
 html[data-theme="blackwork"] .bg-white\/20 {
-  background-color: #161B22;
+  background-color: rgba(255, 255, 255, 0.04);
 }
 html[data-theme="blackwork"] .bg-white\/40,
 html[data-theme="blackwork"] .bg-white\/45 {
-  background-color: #1C2128;
+  background-color: rgba(255, 255, 255, 0.07);
 }
 html[data-theme="blackwork"] .bg-white\/15,
 html[data-theme="blackwork"] .bg-white\/10 {
-  background-color: #12161E;
+  background-color: rgba(255, 255, 255, 0.03);
 }
 html[data-theme="blackwork"] .border-white\/25,
 html[data-theme="blackwork"] .border-white\/20,
 html[data-theme="blackwork"] .border-white\/30 {
-  border-color: #21262D;
+  border-color: rgba(255, 255, 255, 0.06);
 }
 html[data-theme="blackwork"] .border-white\/15 {
-  border-color: #1C2128;
+  border-color: rgba(255, 255, 255, 0.04);
 }
 html[data-theme="blackwork"] .hover\:bg-white\/30:hover,
 html[data-theme="blackwork"] .hover\:bg-white\/40:hover,
 html[data-theme="blackwork"] .hover\:bg-white\/45:hover {
-  background-color: #21262D;
+  background-color: rgba(255, 255, 255, 0.08);
 }
 
-/* Blackwork: input and select styling */
+/* Blackwork: inputs */
 html[data-theme="blackwork"] select,
 html[data-theme="blackwork"] input,
 html[data-theme="blackwork"] textarea {
-  background-color: #0D1117;
+  background-color: rgba(255, 255, 255, 0.05);
   color: #F0F6FC;
-  border-color: #21262D;
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
-/* Blackwork: status badge backgrounds — subtle tints on dark */
+/* Blackwork: status badges — subtle tints */
 html[data-theme="blackwork"] .bg-yellow-100\/80 { background-color: rgba(210, 153, 34, 0.15); }
 html[data-theme="blackwork"] .bg-emerald-100\/80 { background-color: rgba(46, 160, 67, 0.15); }
 html[data-theme="blackwork"] .bg-blue-100\/80 { background-color: rgba(56, 132, 244, 0.15); }
